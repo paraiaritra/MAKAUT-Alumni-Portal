@@ -44,6 +44,14 @@ app.get('/', (req, res) => {
     }
   });
 });
+// health-check
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: Date.now()
+  });
+});
 
 // Error handler
 app.use((err, req, res, next) => {
