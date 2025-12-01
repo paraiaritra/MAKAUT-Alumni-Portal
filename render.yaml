@@ -1,0 +1,10 @@
+﻿services:
+  - type: web
+    name: makaut-backend
+    env: node
+    repo: https://github.com/paraiaritra/MAKAUT-Alumni-Portal
+    branch: main
+    root: backend
+    buildCommand: 'npm install'
+    startCommand: 'npm start'
+    plan: free
