@@ -14,6 +14,7 @@ const Events = () => {
     location: '',
     type: 'Networking',
   });
+  const [expandedEvent, setExpandedEvent] = useState(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -69,6 +70,19 @@ const Events = () => {
     return colors[type] || 'from-gray-500 to-gray-600';
   };
 
+  // helper: check if current user already registered for an event
+  const isUserRegistered = (event) => {
+    if (!user) return false;
+    if (!event.registrations || event.registrations.length === 0) return false;
+
+    return event.registrations.some((r) => {
+      // r.user can be populated object or id string
+      const regUser = r.user && typeof r.user === 'object' ? r.user._id || r.user.id : r.user;
+      if (!regUser) return false;
+      return String(regUser) === String(user._id || user.id);
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -90,91 +104,133 @@ const Events = () => {
 
       {/* Events Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {events.map((event) => (
-          <div
-            key={event._id}
-            className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
-          >
-            {/* Event Header with Gradient */}
-            <div className={`bg-gradient-to-r ${getEventTypeColor(event.type)} p-6 text-white`}>
-              <div className="flex justify-between items-start mb-3">
-                <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold">
-                  {event.type}
-                </span>
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                  <Users size={14} />
-                  <span className="text-xs font-semibold">
-                    {event.registrations?.length || 0} Registered
+        {events.map((event) => {
+          const registeredCount = event.registrations?.length || 0;
+          const already = isUserRegistered(event);
+
+          return (
+            <div
+              key={event._id}
+              className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
+            >
+              {/* Event Header with Gradient */}
+              <div className={`bg-gradient-to-r ${getEventTypeColor(event.type)} p-6 text-white`}>
+                <div className="flex justify-between items-start mb-3">
+                  <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold">
+                    {event.type}
                   </span>
+                  <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                    <Users size={14} />
+                    <span className="text-xs font-semibold">
+                      {registeredCount} Registered
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
-              <p className="text-white/90 text-sm line-clamp-2">{event.description}</p>
-            </div>
-
-            {/* Event Details */}
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-3 text-gray-700">
-                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-2 rounded-lg">
-                  <Calendar className="text-white" size={18} />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 font-medium">Date</p>
-                  <p className="font-semibold">
-                    {new Date(event.date).toLocaleDateString('en-US', {
-                      weekday: 'short',
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </p>
-                </div>
+                <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
+                <p className="text-white/90 text-sm line-clamp-2">{event.description}</p>
               </div>
 
-              {event.time && (
+              {/* Event Details */}
+              <div className="p-6 space-y-4">
                 <div className="flex items-center gap-3 text-gray-700">
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-2 rounded-lg">
-                    <Clock className="text-white" size={18} />
+                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-2 rounded-lg">
+                    <Calendar className="text-white" size={18} />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 font-medium">Time</p>
-                    <p className="font-semibold">{event.time}</p>
+                    <p className="text-xs text-gray-500 font-medium">Date</p>
+                    <p className="font-semibold">
+                      {new Date(event.date).toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </p>
                   </div>
                 </div>
-              )}
 
-              {event.location && (
-                <div className="flex items-center gap-3 text-gray-700">
-                  <div className="bg-gradient-to-r from-orange-500 to-red-600 p-2 rounded-lg">
-                    <MapPin className="text-white" size={18} />
+                {event.time && (
+                  <div className="flex items-center gap-3 text-gray-700">
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-2 rounded-lg">
+                      <Clock className="text-white" size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Time</p>
+                      <p className="font-semibold">{event.time}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500 font-medium">Location</p>
-                    <p className="font-semibold">{event.location}</p>
+                )}
+
+                {event.location && (
+                  <div className="flex items-center gap-3 text-gray-700">
+                    <div className="bg-gradient-to-r from-orange-500 to-red-600 p-2 rounded-lg">
+                      <MapPin className="text-white" size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">Location</p>
+                      <p className="font-semibold">{event.location}</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {event.createdBy && (
-                <div className="pt-3 border-t border-gray-100">
-                  <p className="text-xs text-gray-500 mb-1">Organized by</p>
-                  <p className="text-sm font-medium text-gray-700">
-                    {event.createdBy.name} • {event.createdBy.batch}
-                  </p>
-                </div>
-              )}
+                {event.createdBy && (
+                  <div className="pt-3 border-t border-gray-100">
+                    <p className="text-xs text-gray-500 mb-1">Organized by</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      {event.createdBy.name} • {event.createdBy.batch}
+                    </p>
+                  </div>
+                )}
 
-              {user && (
-                <button
-                  onClick={() => handleRegister(event._id)}
-                  className={`w-full bg-gradient-to-r ${getEventTypeColor(event.type)} text-white py-3 rounded-xl hover:shadow-lg transition-all duration-200 font-semibold mt-4`}
-                >
-                  Register Now
-                </button>
-              )}
+                {/* Registrants preview + toggle */}
+                {registeredCount > 0 && (
+                  <div className="pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-gray-500">Registrants</p>
+                      <button
+                        className="text-xs text-indigo-600 font-medium"
+                        onClick={() => setExpandedEvent(expandedEvent === event._id ? null : event._id)}
+                      >
+                        {expandedEvent === event._id ? 'Hide' : `View (${registeredCount})`}
+                      </button>
+                    </div>
+
+                    {expandedEvent === event._id && (
+                      <ul className="mt-3 space-y-2">
+                        {event.registrations.map((r, idx) => {
+                          const name = r.name || (r.user && (r.user.name || r.user.fullName)) || 'Unknown';
+                          const email = r.email || (r.user && r.user.email) || '';
+                          const ts = r.registeredAt || r.createdAt || null;
+                          return (
+                            <li key={r._id || r.user || idx} className="text-sm text-gray-700 flex justify-between items-center">
+                              <div>
+                                <div className="font-medium">{name}</div>
+                                {email && <div className="text-xs text-gray-400">{email}</div>}
+                              </div>
+                              <div className="text-xs text-gray-400">
+                                {ts ? new Date(ts).toLocaleString() : ''}
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {user && (
+                  <button
+                    onClick={() => handleRegister(event._id)}
+                    disabled={already}
+                    className={`w-full ${already ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : `bg-gradient-to-r ${getEventTypeColor(event.type)} text-white`} py-3 rounded-xl hover:shadow-lg transition-all duration-200 font-semibold mt-4`}
+                  >
+                    {already ? 'Registered' : 'Register Now'}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Empty State */}
