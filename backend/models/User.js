@@ -19,44 +19,42 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
-  batch: {
+  // Added: Profile Picture from Cloudinary
+  profilePicture: {
     type: String,
-    required: true
+    default: 'https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg'
   },
-  department: {
-    type: String,
-    required: true
-  },
-  company: {
-    type: String,
-    default: ''
-  },
-  phone: {
-    type: String,
-    default: ''
-  },
+  batch: { type: String, required: true },
+  department: { type: String, required: true },
+  company: { type: String, default: '' },
+  phone: { type: String, default: '' },
+  
+  // Updated: Role Management
   role: {
     type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
+    enum: ['user', 'alumni', 'admin'],
+    default: 'user' // 'user' = student, 'alumni' = verified graduate
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+  
+  // Added: Verification & Membership
+  isVerified: { type: Boolean, default: false }, // Admin must approve alumni
+  membershipStatus: {
+    type: String,
+    enum: ['free', 'premium'],
+    default: 'free'
+  },
+  membershipExpiry: { type: Date },
+
+  createdAt: { type: Date, default: Date.now }
 });
 
-// Hash password before saving
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
+  if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-// Method to compare password
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };

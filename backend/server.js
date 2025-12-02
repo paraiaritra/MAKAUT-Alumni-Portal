@@ -30,6 +30,9 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/events', require('./routes/events'));
 app.use('/api/jobs', require('./routes/jobs'));
 app.use('/api/alumni', require('./routes/alumni'));
+app.use('/api/upload', require('./routes/uploadRoutes'));
+app.use('/api/payment', require('./routes/paymentRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 // Root
 app.get('/', (req, res) => {

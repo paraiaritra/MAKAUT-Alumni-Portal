@@ -1,81 +1,111 @@
-// backend/routes/auth.js
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// helper
-const sendErr = (res, err, ctx='') => {
-  console.error('ERROR', ctx, err);
-  return res.status(500).json({ message: 'Server error' });
+// Helper to remove sensitive data from logs
+const sanitizeLog = (body) => {
+  const { password, ...rest } = body;
+  return rest;
 };
 
 // Register
 router.post('/register', async (req, res) => {
   try {
-    console.log('REGISTER body ->', req.body);
+    // SECURITY FIX: Do not log password
+    console.log('REGISTER request:', sanitizeLog(req.body));
+    
     const { name, email, password, batch, department } = req.body;
 
     if (!name || !email || !password || !batch || !department) {
-      return res.status(400).json({ message: 'Please provide name, email, password, batch and department' });
+      return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ message: 'User already exists' });
 
-    const user = new User({
-      name,
-      email,
-      password,
-      batch,
-      department
-    });
+    const user = new User({ name, email, password, batch, department });
+    
+    // Auto-verify if it's the first user (optional dev convenience)
+    // const count = await User.countDocuments();
+    // if (count === 0) { user.role = 'admin'; user.isVerified = true; }
 
     await user.save();
 
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      console.error('JWT_SECRET missing in .env');
-      return res.status(500).json({ message: 'Server configuration error' });
-    }
+    const token = jwt.sign(
+      { userId: user._id, role: user.role }, // Payload includes Role now
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
-    const token = jwt.sign({ userId: user._id }, secret, { expiresIn: '7d' });
-
-    return res.status(201).json({
-      message: 'User registered successfully',
+    res.status(201).json({
+      message: 'Registered successfully',
       token,
-      user: { id: user._id, name: user.name, email: user.email, batch: user.batch, department: user.department }
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified
+      }
     });
   } catch (err) {
-    if (err && err.code === 11000) {
-      console.warn('Duplicate key:', err.keyValue);
-      return res.status(400).json({ message: 'Email already registered' });
-    }
-    return sendErr(res, err, 'register');
+    console.error('Register Error:', err.message);
+    res.status(500).json({ message: 'Server error during registration' });
   }
 });
 
 // Login
 router.post('/login', async (req, res) => {
   try {
-    console.log('LOGIN body ->', req.body);
+    // SECURITY FIX: Do not log password
+    console.log('LOGIN request for:', req.body.email);
+
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Missing fields' });
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
-    const ok = await user.comparePassword(password);
-    if (!ok) return res.status(400).json({ message: 'Invalid credentials' });
+    const token = jwt.sign(
+      { userId: user._id, role: user.role }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '7d' }
+    );
 
-    const secret = process.env.JWT_SECRET;
-    if (!secret) return res.status(500).json({ message: 'Server configuration error' });
-
-    const token = jwt.sign({ userId: user._id }, secret, { expiresIn: '7d' });
-
-    return res.json({ token, user: { id: user._id, name: user.name, email: user.email, batch: user.batch, department: user.department } });
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified,
+        profilePicture: user.profilePicture
+      }
+    });
   } catch (err) {
-    return sendErr(res, err, 'login');
+    console.error('Login Error:', err.message);
+    res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// Get Current User (Me)
+router.get('/me', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'No token' });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId).select('-password');
+    
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    res.json(user);
+  } catch (err) {
+    res.status(401).json({ message: 'Invalid token' });
   }
 });
 
