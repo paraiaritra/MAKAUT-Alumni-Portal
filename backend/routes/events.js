@@ -7,7 +7,7 @@ const auth = require('../middleware/auth');
 router.get('/', async (req, res) => {
   try {
     const events = await Event.find()
-      .populate('createdBy', 'name email')
+      .populate('createdBy', 'name email batch')
       .sort({ date: 1 });
     res.json(events);
   } catch (error) {
@@ -18,13 +18,15 @@ router.get('/', async (req, res) => {
 // Create event (protected)
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, description, date, location } = req.body;
+    const { title, description, date, time, location, type } = req.body;
 
     const event = new Event({
       title,
       description,
       date,
+      time,
       location,
+      type,
       createdBy: req.user._id
     });
 
