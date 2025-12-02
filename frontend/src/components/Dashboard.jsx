@@ -40,13 +40,13 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
       name: "Samrat Ghosh",
       company: "Google",
       role: "Senior Software Engineer",
-      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200&h=200"
+      image: "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702803/WhatsApp_Image_2025-12-03_at_00.42.37_aefca4ab_hyyaox.jpg"
     },
     {
       name: "Anupam Yadav",
       company: "Microsoft",
       role: "Product Manager",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200&h=200"
+      image: "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764701602/Screenshot_2025-12-03_002257_fd5lik.png"
     },
     {
       name: "Priya Das",
@@ -58,12 +58,16 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
 
   // Static Data for Gallery
   const galleryImages = [
-    "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1590012314607-6da64f934ef7?auto=format&fit=crop&q=80&w=400"
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702282/IMG-20251203-WA0015_dmf5jt.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702282/IMG-20251203-WA0017_veqgxx.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702282/IMG-20251203-WA0016_eb4x65.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702281/IMG-20251203-WA0014_rw193d.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702281/IMG-20251203-WA0012_reifol.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702280/IMG-20251203-WA0010_veinul.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702280/IMG-20251203-WA0007_jbul4q.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702278/IMG-20251203-WA0003_msd0yq.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702277/IMG-20251203-WA0002_g4a7wn.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702278/IMG-20251203-WA0001_wxt1xl.jpg"
   ];
 
   return (
@@ -74,8 +78,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
         {/* Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          // CHANGE THE URL INSIDE THE QUOTES BELOW
-          style={{ backgroundImage: 'url("https://makautwb.ac.in/images/slider/banner1.jpg")' }} 
+          style={{ backgroundImage: 'url("https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702811/main_pic_makaut_nfnrzv.jpg")' }}
         >
           <div className="absolute inset-0 bg-black/60"></div>
         </div>
