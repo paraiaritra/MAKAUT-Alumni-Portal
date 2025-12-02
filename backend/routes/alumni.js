@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Alumni = require('../models/Alumni');
-const auth = require('../middleware/auth');
+// FIX: Destructure 'protect' from the middleware object
+const { protect } = require('../middleware/auth');
 
 // Get all alumni
 router.get('/', async (req, res) => {
@@ -33,7 +34,8 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update alumni profile (protected)
-router.put('/profile', auth, async (req, res) => {
+// FIX: Use 'protect' instead of 'auth'
+router.put('/profile', protect, async (req, res) => {
   try {
     const { bio, skills, experience, education, socialLinks, achievements } = req.body;
 

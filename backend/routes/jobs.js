@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Job = require('../models/Job');
-const auth = require('../middleware/auth');
+// FIX: Destructure 'protect' from the middleware object
+const { protect } = require('../middleware/auth');
 
 // Get all jobs
 router.get('/', async (req, res) => {
@@ -16,7 +17,8 @@ router.get('/', async (req, res) => {
 });
 
 // Create job posting (protected)
-router.post('/', auth, async (req, res) => {
+// FIX: Use 'protect' instead of 'auth'
+router.post('/', protect, async (req, res) => {
   try {
     const { company, position, description, location, type, salary } = req.body;
 
@@ -38,7 +40,8 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Apply for job (protected)
-router.post('/:id/apply', auth, async (req, res) => {
+// FIX: Use 'protect' instead of 'auth'
+router.post('/:id/apply', protect, async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
     
@@ -65,7 +68,8 @@ router.post('/:id/apply', auth, async (req, res) => {
 });
 
 // Delete job (protected)
-router.delete('/:id', auth, async (req, res) => {
+// FIX: Use 'protect' instead of 'auth'
+router.delete('/:id', protect, async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
 

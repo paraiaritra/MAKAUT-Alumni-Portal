@@ -1,7 +1,9 @@
 const express = require('express'); 
 const router = express.Router();
 const Event = require('../models/Event');
-const auth = require('../middleware/auth');
+// FIX: Destructure 'protect' from the middleware object
+// If you named your new file 'authMiddleware.js', change this path to '../middleware/authMiddleware'
+const { protect } = require('../middleware/auth'); 
 
 // Get all events with populated user data
 router.get('/', async (req, res) => {
@@ -43,7 +45,8 @@ router.get('/', async (req, res) => {
 });
 
 // Create event (protected)
-router.post('/', auth, async (req, res) => {
+// FIX: Use 'protect' instead of 'auth'
+router.post('/', protect, async (req, res) => {
   try {
     const { title, description, date, time, location, type } = req.body;
 
@@ -69,7 +72,8 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Register for event (protected)
-router.post('/:id/register', auth, async (req, res) => {
+// FIX: Use 'protect' instead of 'auth'
+router.post('/:id/register', protect, async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
 
@@ -112,7 +116,8 @@ router.post('/:id/register', auth, async (req, res) => {
 });
 
 // Delete event (protected)
-router.delete('/:id', auth, async (req, res) => {
+// FIX: Use 'protect' instead of 'auth'
+router.delete('/:id', protect, async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
 
