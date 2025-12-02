@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, MapPin, ExternalLink, ArrowRight, Heart, Shield } from 'lucide-react';
+import { Calendar, MapPin, ExternalLink, ArrowRight, Heart, Shield, Phone, Mail } from 'lucide-react';
 import EditProfileModal from './EditProfileModal'; 
-import AdminAuth from './AdminAuth'; // NEW: Admin Login Modal
+import AdminAuth from './AdminAuth';
 
 const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginClick }) => {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showAdminLogin, setShowAdminLogin] = useState(false); // State for Admin Modal
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
 
   const refreshData = () => { console.log("Profile updated"); };
 
@@ -156,6 +156,54 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
               <img src={img} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* 6. CONTACT SECTION (Guaranteed at Bottom) */}
+      <div className="bg-indigo-50 rounded-3xl p-8 md:p-12 border border-indigo-100 mb-12">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold text-indigo-900">Contact Us</h2>
+          <p className="text-indigo-600 mt-2">Get in touch with the Alumni Association</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          {/* Address */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MapPin size={24} />
+            </div>
+            <h3 className="font-bold text-gray-800 mb-2">Our Address</h3>
+            <p className="text-gray-600 text-sm">
+              <span className="font-semibold block mb-1">City Office:</span> BF-142, Sector-I, Saltlake City, Kolkata-64
+            </p>
+            <p className="text-gray-600 text-sm mt-2">
+              <span className="font-semibold block mb-1">Main Office:</span> NH12, Simhat, Nadia, West Bengal, 741249
+            </p>
+          </div>
+
+          {/* Email */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Mail size={24} />
+            </div>
+            <h3 className="font-bold text-gray-800 mb-2">Email Us</h3>
+            <a href="mailto:makautwb.alumni@gmail.com" className="text-indigo-600 font-medium hover:underline">
+              makautwb.alumni@gmail.com
+            </a>
+            <p className="text-xs text-gray-400 mt-2">We reply within 24 hours</p>
+          </div>
+
+          {/* Call */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Phone size={24} />
+            </div>
+            <h3 className="font-bold text-gray-800 mb-2">Call Us</h3>
+            <a href="tel:03325891555" className="text-2xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">
+              033 2589 1555
+            </a>
+            <p className="text-xs text-gray-400 mt-2">Mon - Fri, 9am - 5pm</p>
+          </div>
         </div>
       </div>
 

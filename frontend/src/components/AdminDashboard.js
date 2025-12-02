@@ -31,6 +31,7 @@ const AdminDashboard = () => {
     loadData();
   };
 
+  // UPDATED: Show ID and Name
   const handleViewApplicants = async (id) => {
     try {
       let res;
@@ -39,10 +40,10 @@ const AdminDashboard = () => {
       
       const applicants = res.data.map(item => {
         const user = item.user || {};
-        return `${user.name || 'Unknown'} (${user.email}) - ${user.department}`;
+        return `Name: ${user.name || 'Unknown'}\nID: ${user._id}\nEmail: ${user.email}\n----------------`;
       }).join('\n');
       
-      alert(applicants || "No applicants yet.");
+      alert(applicants || "No participants yet.");
     } catch (err) { alert("Could not fetch details."); }
   };
 
@@ -72,7 +73,7 @@ const AdminDashboard = () => {
             { id: 'unverified', label: 'Verifications', icon: Users },
             { id: 'jobs', label: 'Manage Jobs', icon: Briefcase },
             { id: 'events', label: 'Manage Events', icon: Calendar },
-            { id: 'messages', label: 'Messages', icon: MessageSquare },
+            { id: 'messages', label: 'Feedback', icon: MessageSquare },
           ].map(tab => (
             <button key={tab.id} onClick={() => setActiveView(tab.id)} className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-sm ${activeView === tab.id ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-200'}`}>
               <tab.icon size={18} /> {tab.label}
