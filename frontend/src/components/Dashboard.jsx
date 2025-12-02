@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Calendar, Briefcase, TrendingUp, Award, MapPin, ShieldCheck, Crown } from 'lucide-react';
+import { Users, Calendar, Briefcase, TrendingUp, Award, MapPin, ShieldCheck, Crown, Edit3 } from 'lucide-react';
 import EditProfileModal from './EditProfileModal'; 
 
 const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
@@ -17,7 +17,8 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
 
   // Helper to refresh data
   const refreshData = () => {
-    window.location.reload(); 
+    // We avoid window.location.reload() to prevent logging out
+    console.log("Profile updated");
   };
 
   useEffect(() => {
@@ -47,200 +48,202 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
     }
   };
 
-  const StatCard = ({ icon: Icon, label, value, color, gradient, onClick }) => (
+  // Reusable Clean Stat Card
+  const StatCard = ({ icon: Icon, label, value, colorClass, onClick }) => (
     <div 
       onClick={onClick}
-      className={`bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer`}
+      className="bg-white rounded-xl p-6 shadow-md border-b-4 border-indigo-600 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col items-center text-center group"
     >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-white/90 text-sm font-medium mb-1">{label}</p>
-          <p className="text-4xl font-bold text-white">{loading ? '...' : value}</p>
-          <div className="flex items-center gap-1 mt-2">
-            <TrendingUp size={14} className="text-white/80" />
-            <span className="text-xs text-white/80">Active</span>
-          </div>
-        </div>
-        <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl">
-          <Icon className="text-white" size={32} />
-        </div>
+      <div className={`p-4 rounded-full bg-indigo-50 group-hover:bg-indigo-100 transition-colors mb-4 ${colorClass}`}>
+        <Icon size={32} className="text-indigo-600" />
       </div>
+      <h3 className="text-3xl font-bold text-gray-800 mb-1">{loading ? '...' : value}</h3>
+      <p className="text-gray-500 font-medium">{label}</p>
     </div>
   );
 
   return (
-    <div className="space-y-6">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="space-y-8 font-sans">
+      
+      {/* 1. Hero Section - Dark Professional Theme */}
+      <div className="relative bg-slate-900 rounded-3xl overflow-hidden shadow-2xl min-h-[300px] flex flex-col justify-center text-center px-4">
+        {/* Background Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-900 opacity-95"></div>
+        
+        <div className="relative z-10 py-12">
+          {/* Profile Photo */}
+          <div className="w-28 h-28 mx-auto mb-6 rounded-full border-4 border-white/20 p-1 relative group cursor-pointer" onClick={() => setShowEditModal(true)}>
+             <img 
+                src={user?.profilePicture || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"} 
+                alt="Profile" 
+                className="w-full h-full object-cover rounded-full"
+              />
+              <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                 <Edit3 className="text-white w-8 h-8" />
+              </div>
+          </div>
+          
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight uppercase">
+            {user?.name || 'Alumni Member'}
+          </h1>
+          <p className="text-indigo-200 text-lg mb-8 max-w-2xl mx-auto font-light">
+            {user?.role === 'admin' 
+              ? 'Administrator Console • Managed Access' 
+              : 'Welcome to the MAKAUT Alumni Association. Together We Learn, Together We Grow.'}
+          </p>
+
+          <div className="flex justify-center gap-4">
+             {user?.role === 'admin' && (
+               <button 
+                onClick={() => setActiveTab('admin')}
+                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all flex items-center gap-2 transform hover:scale-105"
+               >
+                 <ShieldCheck size={20} /> Admin Console
+               </button>
+             )}
+             <button 
+                onClick={() => setShowEditModal(true)} 
+                className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-8 py-3 rounded-full font-semibold backdrop-blur-sm transition-all"
+             >
+                Edit Profile
+             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Stats Section - Overlapping the Hero slightly */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 -mt-12 relative z-20 px-4">
         <StatCard
           icon={Users}
-          label="Total Alumni"
+          label="Registered Alumni"
           value={stats.alumni}
-          gradient="from-blue-500 to-blue-600"
+          colorClass="text-blue-600"
           onClick={() => setActiveTab('alumni')}
         />
         <StatCard
           icon={Calendar}
           label="Upcoming Events"
           value={stats.events}
-          gradient="from-green-500 to-emerald-600"
+          colorClass="text-green-600"
           onClick={() => setActiveTab('events')}
         />
         <StatCard
           icon={Briefcase}
-          label="Job Openings"
+          label="Active Jobs"
           value={stats.jobs}
-          gradient="from-purple-500 to-pink-600"
+          colorClass="text-purple-600"
           onClick={() => setActiveTab('jobs')}
         />
       </div>
 
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl shadow-xl overflow-hidden relative">
-        <div className="p-8 text-white relative z-10 flex flex-col md:flex-row items-center gap-6">
-          {/* Profile Picture */}
-          <div className="relative group cursor-pointer" onClick={() => setShowEditModal(true)}>
-            <div className="w-24 h-24 rounded-full border-4 border-white/30 overflow-hidden shadow-lg bg-white/10">
-              <img 
-                src={user?.profilePicture || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"} 
-                alt="Profile" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-               <span className="text-xs font-bold text-white">Edit</span>
-            </div>
-            {user?.membershipStatus === 'premium' && (
-              <div className="absolute -bottom-2 -right-2 bg-yellow-400 text-yellow-900 p-1.5 rounded-full shadow-lg" title="Premium Member">
-                <Crown size={20} fill="currentColor" />
-              </div>
-            )}
-          </div>
-
-          <div className="text-center md:text-left flex-1">
-            <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-              <h2 className="text-3xl font-bold">Welcome back, {user?.name?.split(' ')[0] || 'Alumni'}!</h2>
-              {user?.role === 'admin' && (
-                <span className="bg-red-500/80 text-white text-xs px-2 py-1 rounded-full border border-red-400 flex items-center gap-1">
-                  <ShieldCheck size={12} /> Admin
-                </span>
-              )}
-            </div>
-            <p className="text-lg text-white/90 max-w-2xl">
-              {user?.role === 'admin' 
-                ? "You have full access to manage alumni verifications, job postings, and events." 
-                : "Explore opportunities, connect with batchmates, and stay updated with your alma mater."}
-            </p>
-          </div>
-          
-          <div className="flex flex-col gap-3">
-             {user?.role === 'admin' && (
-               <button 
-                onClick={() => setActiveTab('admin')}
-                className="bg-white text-indigo-600 px-6 py-2 rounded-lg font-bold shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
-               >
-                 <ShieldCheck size={18} /> Admin Dashboard
-               </button>
-             )}
-             
-             {/* Edit Profile Button (Header) */}
-             <button 
-                onClick={() => setShowEditModal(true)} 
-                className="bg-white/20 hover:bg-white/30 text-white border border-white/40 px-6 py-2 rounded-lg font-semibold backdrop-blur-sm transition-all"
-             >
-                Edit Profile
-             </button>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-64 h-64 bg-pink-500/20 rounded-full blur-3xl"></div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {recentEvent ? (
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="bg-green-100 text-green-600 p-2 rounded-lg">
-                <Calendar size={20} />
-              </div>
-              <h3 className="text-xl font-bold text-gray-800">Latest Event</h3>
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-lg font-semibold text-gray-800">{recentEvent.title}</h4>
-              <p className="text-sm text-gray-600 line-clamp-2">{recentEvent.description}</p>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Calendar size={16} />
-                <span>{new Date(recentEvent.date).toLocaleDateString()}</span>
-              </div>
-              <button onClick={() => setActiveTab('events')} className="w-full mt-4 bg-green-50 text-green-600 py-2.5 rounded-lg hover:bg-green-100 transition-all font-semibold">
-                View Details
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 flex flex-col items-center justify-center text-center py-10">
-            <Calendar className="text-gray-300 mb-3" size={48} />
-            <p className="text-gray-500">No upcoming events</p>
-          </div>
-        )}
-
-        {recentJob ? (
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="bg-purple-100 text-purple-600 p-2 rounded-lg">
-                <Briefcase size={20} />
-              </div>
-              <h3 className="text-xl font-bold text-gray-800">Latest Job</h3>
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-lg font-semibold text-gray-800">{recentJob.position}</h4>
-              <p className="text-md font-medium text-indigo-600">{recentJob.company}</p>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold">
-                  {recentJob.type}
-                </span>
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold flex items-center gap-1">
-                  <MapPin size={12} /> {recentJob.location}
-                </span>
-              </div>
-              <button onClick={() => setActiveTab('jobs')} className="w-full mt-4 bg-purple-50 text-purple-600 py-2.5 rounded-lg hover:bg-purple-100 transition-all font-semibold">
-                Apply Now
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 flex flex-col items-center justify-center text-center py-10">
-            <Briefcase className="text-gray-300 mb-3" size={48} />
-            <p className="text-gray-500">No job openings yet</p>
-          </div>
-        )}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button onClick={() => setActiveTab('alumni')} className="p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors text-left">
-            <Users className="text-blue-600 mb-2" size={24} />
-            <p className="font-semibold text-gray-800">Directory</p>
-          </button>
-          <button onClick={() => setActiveTab('events')} className="p-4 rounded-xl bg-green-50 hover:bg-green-100 transition-colors text-left">
-            <Calendar className="text-green-600 mb-2" size={24} />
-            <p className="font-semibold text-gray-800">Events</p>
-          </button>
-          <button onClick={() => setActiveTab('jobs')} className="p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors text-left">
-            <Briefcase className="text-purple-600 mb-2" size={24} />
-            <p className="font-semibold text-gray-800">Jobs</p>
-          </button>
+        {/* Main Content Area - Left 2 Columns */}
+        <div className="lg:col-span-2 space-y-8">
           
-          {/* UPDATED: Profile button now switches tab to 'profile' instead of opening modal */}
-          <button onClick={() => setActiveTab('profile')} className="p-4 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors text-left">
-            <Award className="text-orange-600 mb-2" size={24} />
-            <p className="font-semibold text-gray-800">Profile</p>
-          </button>
+          {/* Quick Actions - Styled like "Our Mission" cards from reference */}
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+              <span className="w-1 h-8 bg-orange-500 rounded-full"></span>
+              Quick Access
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+               {[
+                 { label: 'Directory', icon: Users, tab: 'alumni', color: 'bg-blue-50 text-blue-600' },
+                 { label: 'Events', icon: Calendar, tab: 'events', color: 'bg-green-50 text-green-600' },
+                 { label: 'Jobs', icon: Briefcase, tab: 'jobs', color: 'bg-purple-50 text-purple-600' },
+                 { label: 'View Profile', icon: Award, tab: 'profile', color: 'bg-orange-50 text-orange-600' }
+               ].map((item) => (
+                 <button 
+                   key={item.label}
+                   onClick={() => setActiveTab(item.tab)}
+                   className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all hover:border-orange-200 group bg-white text-left"
+                 >
+                   <div className={`p-3 rounded-lg ${item.color} group-hover:scale-110 transition-transform`}>
+                     <item.icon size={24} />
+                   </div>
+                   <div>
+                     <span className="block font-bold text-gray-800 text-lg">{item.label}</span>
+                     <span className="text-xs text-gray-500">Click to view</span>
+                   </div>
+                 </button>
+               ))}
+            </div>
+          </div>
+
+          {/* Recent Event - List Style */}
+          {recentEvent && (
+             <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+               <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                 <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                   <Calendar className="text-orange-500" size={20} /> Latest Event
+                 </h3>
+                 <button onClick={() => setActiveTab('events')} className="text-sm text-indigo-600 font-medium hover:underline">View All</button>
+               </div>
+               <div className="p-6 flex flex-col md:flex-row gap-6 items-start">
+                 <div className="bg-indigo-100 text-indigo-700 rounded-xl p-4 text-center min-w-[100px]">
+                    <span className="block text-3xl font-bold">{new Date(recentEvent.date).getDate()}</span>
+                    <span className="text-sm font-bold uppercase">{new Date(recentEvent.date).toLocaleString('default', { month: 'short' })}</span>
+                 </div>
+                 <div>
+                   <h4 className="text-xl font-bold text-gray-800 mb-2">{recentEvent.title}</h4>
+                   <p className="text-gray-600 text-sm mb-4 line-clamp-2">{recentEvent.description}</p>
+                   <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span className="flex items-center gap-1"><MapPin size={14}/> {recentEvent.location || 'Online'}</span>
+                   </div>
+                 </div>
+               </div>
+             </div>
+          )}
         </div>
+
+        {/* Sidebar - Right Column */}
+        <div className="space-y-8">
+           {/* Recent Job Card */}
+           {recentJob ? (
+             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <Briefcase className="text-orange-500" size={20} /> New Opportunity
+                </h3>
+                <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                   <h4 className="font-bold text-gray-900 text-lg">{recentJob.position}</h4>
+                   <p className="text-indigo-600 font-medium text-sm mb-3">{recentJob.company}</p>
+                   <div className="flex flex-wrap gap-2 mb-4">
+                      <span className="px-2 py-1 bg-white border rounded text-xs font-medium text-gray-600">{recentJob.type}</span>
+                      <span className="px-2 py-1 bg-white border rounded text-xs font-medium text-gray-600">{recentJob.location}</span>
+                   </div>
+                   <button onClick={() => setActiveTab('jobs')} className="w-full py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm">
+                     Apply Now
+                   </button>
+                </div>
+             </div>
+           ) : (
+             <div className="bg-gray-50 rounded-2xl p-8 text-center border border-dashed border-gray-300">
+               <Briefcase className="mx-auto text-gray-400 mb-2" size={32}/>
+               <p className="text-gray-500 font-medium">No jobs posted recently</p>
+             </div>
+           )}
+
+           {/* Membership Status Box */}
+           <div className={`rounded-2xl p-6 border ${user?.membershipStatus === 'premium' ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-orange-100' : 'bg-gradient-to-br from-gray-50 to-slate-100 border-gray-200'}`}>
+              <div className="flex items-center gap-3 mb-3">
+                 {user?.membershipStatus === 'premium' ? <Crown className="text-orange-500" size={24} /> : <ShieldCheck className="text-gray-400" size={24} />}
+                 <div>
+                   <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Membership Status</p>
+                   <p className="font-bold text-gray-900 capitalize text-lg">{user?.membershipStatus || 'Free'} Plan</p>
+                 </div>
+              </div>
+              {user?.membershipStatus !== 'premium' && (
+                <button 
+                  onClick={() => setShowEditModal(true)}
+                  className="w-full mt-2 bg-white border border-gray-300 text-gray-700 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors shadow-sm"
+                >
+                  Upgrade Membership
+                </button>
+              )}
+           </div>
+        </div>
+
       </div>
 
       {/* Edit Modal (Conditional Render) */}
