@@ -1,70 +1,124 @@
 import React, { useState, useEffect } from 'react';
-import { adminAPI } from '../services/api';
+import { adminAPI, jobsAPI, eventsAPI, contactAPI } from '../services/api';
+import { Users, Briefcase, Calendar, MessageSquare, Trash2, Eye, Plus, Check } from 'lucide-react';
 
 const AdminDashboard = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState('unverified'); 
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Mock data for now - Implement api.getUnverifiedUsers() in backend
-    // fetchUsers();
-    setUsers([
-      { _id: '1', name: 'John Doe', email: 'john@makaut.edu', batch: '2023', department: 'CSE' },
-      { _id: '2', name: 'Jane Smith', email: 'jane@makaut.edu', batch: '2022', department: 'IT' },
-    ]);
-    setLoading(false);
-  }, []);
+  useEffect(() => { loadData(); }, [activeView]);
 
-  const handleApprove = async (id) => {
+  const loadData = async () => {
+    setLoading(true);
     try {
-      // await adminAPI.verifyUser(id);
-      setUsers(users.filter(u => u._id !== id));
-      alert('User Approved!');
-    } catch (err) {
-      alert('Failed to approve');
-    }
+      let res;
+      if (activeView === 'unverified') res = await adminAPI.getUnverifiedUsers();
+      if (activeView === 'jobs') res = await jobsAPI.getAllJobs();
+      if (activeView === 'events') res = await eventsAPI.getAllEvents();
+      if (activeView === 'messages') res = await contactAPI.getMessages();
+      setData(res.data || []);
+    } catch (err) { console.error(err); } 
+    finally { setLoading(false); }
   };
 
-  if (loading) return <div>Loading Admin Panel...</div>;
+  const handleVerify = async (id) => { await adminAPI.verifyUser(id); loadData(); };
+  
+  const handleDelete = async (id) => {
+    if(!window.confirm("Delete this item?")) return;
+    if (activeView === 'jobs') await jobsAPI.deleteJob(id);
+    if (activeView === 'events') await eventsAPI.deleteEvent(id);
+    loadData();
+  };
+
+  const handleViewApplicants = async (id) => {
+    try {
+      let res;
+      if (activeView === 'jobs') res = await jobsAPI.getApplications(id);
+      if (activeView === 'events') res = await eventsAPI.getParticipants(id);
+      
+      const applicants = res.data.map(item => {
+        const user = item.user || {};
+        return `${user.name || 'Unknown'} (${user.email}) - ${user.department}`;
+      }).join('\n');
+      
+      alert(applicants || "No applicants yet.");
+    } catch (err) { alert("Could not fetch details."); }
+  };
+
+  const handleCreate = async () => {
+    if (activeView === 'jobs') {
+      const company = prompt("Company:");
+      const position = prompt("Position:");
+      const location = prompt("Location:");
+      const salary = prompt("Salary (e.g. 10 LPA):");
+      if(company) await jobsAPI.createJob({ company, position, description: "New Opportunity", location, salary, type: "Full-time" });
+    }
+    if (activeView === 'events') {
+      const title = prompt("Title:");
+      const date = prompt("Date (YYYY-MM-DD):");
+      if(title) await eventsAPI.createEvent({ title, date, description: "New Event", location: "Campus", time: "10:00 AM" });
+    }
+    loadData();
+  };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Admin Dashboard - Pending Approvals</h2>
-      
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Batch/Dept</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
-              <tr key={user._id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                  <div className="text-sm text-gray-500">{user.email}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    {user.batch} - {user.department}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button 
-                    onClick={() => handleApprove(user._id)}
-                    className="text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded-md"
-                  >
-                    Approve
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {users.length === 0 && <p className="text-center py-4 text-gray-500">No pending approvals.</p>}
+    <div className="min-h-screen bg-slate-50 p-8">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-slate-900 mb-8">Admin Console</h1>
+        
+        <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
+          {[
+            { id: 'unverified', label: 'Verifications', icon: Users },
+            { id: 'jobs', label: 'Manage Jobs', icon: Briefcase },
+            { id: 'events', label: 'Manage Events', icon: Calendar },
+            { id: 'messages', label: 'Messages', icon: MessageSquare },
+          ].map(tab => (
+            <button key={tab.id} onClick={() => setActiveView(tab.id)} className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-sm ${activeView === tab.id ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-200'}`}>
+              <tab.icon size={18} /> {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {(activeView === 'jobs' || activeView === 'events') && (
+          <div className="flex justify-end mb-6">
+            <button onClick={handleCreate} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-lg hover:scale-105 transition-transform">
+              <Plus size={20} /> Create New
+            </button>
+          </div>
+        )}
+
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          {loading ? <div className="p-12 text-center text-slate-400">Loading...</div> : data.length === 0 ? <div className="p-12 text-center text-slate-400">No records found.</div> : (
+            <table className="w-full text-left">
+              <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                <tr><th className="p-5">Title / Name</th><th className="p-5">Details</th><th className="p-5 text-right">Actions</th></tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {data.map(item => (
+                  <tr key={item._id} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-5 font-medium text-slate-900">{item.name || item.title || item.company || item.position}</td>
+                    <td className="p-5 text-sm text-slate-600">
+                      {activeView === 'unverified' && `${item.department} (${item.batch})`}
+                      {activeView === 'jobs' && `${item.position} • ${item.location}`}
+                      {activeView === 'events' && `${new Date(item.date).toDateString()}`}
+                      {activeView === 'messages' && <span className="italic">"{item.message}"</span>}
+                    </td>
+                    <td className="p-5 text-right flex justify-end gap-3">
+                      {activeView === 'unverified' && <button onClick={() => handleVerify(item._id)} className="bg-green-100 text-green-700 p-2 rounded-lg hover:bg-green-200"><Check size={18} /></button>}
+                      {(activeView === 'jobs' || activeView === 'events') && (
+                        <>
+                          <button onClick={() => handleViewApplicants(item._id)} className="bg-blue-100 text-blue-700 p-2 rounded-lg hover:bg-blue-200" title="View Applicants"><Users size={18} /></button>
+                          <button onClick={() => handleDelete(item._id)} className="bg-red-100 text-red-700 p-2 rounded-lg hover:bg-red-200" title="Delete"><Trash2 size={18} /></button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );
