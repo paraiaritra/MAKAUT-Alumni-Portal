@@ -17,7 +17,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
 
   // Helper to refresh data (reload page to show new avatar/status)
   const refreshData = () => {
-    window.location.reload(); 
+    console.log("Data updated");
   };
 
   useEffect(() => {
