@@ -29,7 +29,8 @@ const Jobs = () => {
     }
   };
 
-  const handleCreateJob = async () => {
+  const handleCreateJob = async (e) => {
+    e.preventDefault();
     try {
       await jobsAPI.createJob(newJob);
       setShowModal(false);
@@ -44,6 +45,7 @@ const Jobs = () => {
       fetchJobs();
     } catch (error) {
       console.error('Error creating job:', error);
+      alert(error.response?.data?.message || 'Error creating job');
     }
   };
 
@@ -115,13 +117,14 @@ const Jobs = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-bold mb-4">Post New Job</h3>
-            <div className="space-y-4">
+            <form onSubmit={handleCreateJob} className="space-y-4">
               <input
                 type="text"
                 placeholder="Company Name"
                 value={newJob.company}
                 onChange={(e) => setNewJob({ ...newJob, company: e.target.value })}
                 className="w-full px-4 py-2 border rounded-lg"
+                required
               />
               <input
                 type="text"
@@ -129,6 +132,7 @@ const Jobs = () => {
                 value={newJob.position}
                 onChange={(e) => setNewJob({ ...newJob, position: e.target.value })}
                 className="w-full px-4 py-2 border rounded-lg"
+                required
               />
               <textarea
                 placeholder="Job Description"
@@ -136,6 +140,7 @@ const Jobs = () => {
                 onChange={(e) => setNewJob({ ...newJob, description: e.target.value })}
                 className="w-full px-4 py-2 border rounded-lg"
                 rows="3"
+                required
               />
               <input
                 type="text"
@@ -143,6 +148,7 @@ const Jobs = () => {
                 value={newJob.location}
                 onChange={(e) => setNewJob({ ...newJob, location: e.target.value })}
                 className="w-full px-4 py-2 border rounded-lg"
+                required
               />
               <select
                 value={newJob.type}
@@ -163,19 +169,20 @@ const Jobs = () => {
               />
               <div className="flex gap-2">
                 <button
-                  onClick={handleCreateJob}
+                  type="submit"
                   className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
                 >
                   Post Job
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowModal(false)}
                   className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
                 >
                   Cancel
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}

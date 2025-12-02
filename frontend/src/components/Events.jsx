@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar, Plus, MapPin, Clock, Users, X } from 'lucide-react';
+import { eventsAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
-const Events = ({ eventsAPI, user }) => {
+const Events = () => {
   const [events, setEvents] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [newEvent, setNewEvent] = useState({
@@ -12,6 +14,7 @@ const Events = ({ eventsAPI, user }) => {
     location: '',
     type: 'Networking',
   });
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchEvents();
@@ -26,7 +29,8 @@ const Events = ({ eventsAPI, user }) => {
     }
   };
 
-  const handleCreateEvent = async () => {
+  const handleCreateEvent = async (e) => {
+    e.preventDefault();
     try {
       await eventsAPI.createEvent(newEvent);
       setShowModal(false);
@@ -41,6 +45,7 @@ const Events = ({ eventsAPI, user }) => {
       fetchEvents();
     } catch (error) {
       console.error('Error creating event:', error);
+      alert(error.response?.data?.message || 'Error creating event');
     }
   };
 
@@ -99,7 +104,7 @@ const Events = ({ eventsAPI, user }) => {
                 <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
                   <Users size={14} />
                   <span className="text-xs font-semibold">
-                    {event.registeredUsers?.length || 0} Registered
+                    {event.registrations?.length || 0} Registered
                   </span>
                 </div>
               </div>
@@ -150,11 +155,11 @@ const Events = ({ eventsAPI, user }) => {
                 </div>
               )}
 
-              {event.organizer && (
+              {event.createdBy && (
                 <div className="pt-3 border-t border-gray-100">
                   <p className="text-xs text-gray-500 mb-1">Organized by</p>
                   <p className="text-sm font-medium text-gray-700">
-                    {event.organizer.name} • {event.organizer.batch}
+                    {event.createdBy.name} • {event.createdBy.batch}
                   </p>
                 </div>
               )}
@@ -208,7 +213,7 @@ const Events = ({ eventsAPI, user }) => {
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 space-y-4">
+            <form onSubmit={handleCreateEvent} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Event Title</label>
                 <input
@@ -217,6 +222,7 @@ const Events = ({ eventsAPI, user }) => {
                   value={newEvent.title}
                   onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  required
                 />
               </div>
 
@@ -228,6 +234,7 @@ const Events = ({ eventsAPI, user }) => {
                   onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   rows="3"
+                  required
                 />
               </div>
 
@@ -239,6 +246,7 @@ const Events = ({ eventsAPI, user }) => {
                     value={newEvent.date}
                     onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    required
                   />
                 </div>
 
@@ -261,6 +269,7 @@ const Events = ({ eventsAPI, user }) => {
                   value={newEvent.location}
                   onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  required
                 />
               </div>
 
@@ -280,19 +289,20 @@ const Events = ({ eventsAPI, user }) => {
 
               <div className="flex gap-3 pt-4">
                 <button
-                  onClick={handleCreateEvent}
+                  type="submit"
                   className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl hover:shadow-lg transition-all duration-200 font-semibold"
                 >
                   Create Event
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowModal(false)}
                   className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl hover:bg-gray-200 transition-colors font-semibold"
                 >
                   Cancel
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
