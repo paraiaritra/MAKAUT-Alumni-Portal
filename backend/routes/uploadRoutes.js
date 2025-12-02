@@ -3,7 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
-const { protect } = require('../middleware/authMiddleware');
+// FIX: Change 'authMiddleware' to 'auth' to match your actual filename
+const { protect } = require('../middleware/auth');
 const User = require('../models/User');
 
 // Configure Cloudinary

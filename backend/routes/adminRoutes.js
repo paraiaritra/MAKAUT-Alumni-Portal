@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { protect, adminOnly } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/auth');
 
 // @desc    Get all unverified alumni
 // @route   GET /api/admin/unverified

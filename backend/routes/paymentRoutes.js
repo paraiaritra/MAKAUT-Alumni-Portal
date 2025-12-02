@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
-const { protect } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/auth');
 const User = require('../models/User');
 
 const razorpay = new Razorpay({
