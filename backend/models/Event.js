@@ -32,16 +32,24 @@ const eventSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  registrations: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    registeredAt: {
-      type: Date,
-      default: Date.now
+  registrations: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      name: {
+        type: String
+      },
+      email: {
+        type: String
+      },
+      registeredAt: {
+        type: Date,
+        default: Date.now
+      }
     }
-  }],
+  ],
   createdAt: {
     type: Date,
     default: Date.now

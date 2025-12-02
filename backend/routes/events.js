@@ -1,16 +1,43 @@
-const express = require('express');
+const express = require('express'); 
 const router = express.Router();
 const Event = require('../models/Event');
 const auth = require('../middleware/auth');
 
-// Get all events
+// Get all events with populated user data
 router.get('/', async (req, res) => {
   try {
     const events = await Event.find()
       .populate('createdBy', 'name email batch')
-      .sort({ date: 1 });
-    res.json(events);
+      .populate({
+        path: 'registrations.user',
+        select: 'name email batch'
+      })
+      .sort({ date: 1 })
+      .lean(); // Convert to plain JavaScript objects
+
+    // Transform the data to ensure name/email are available
+    const eventsWithDetails = events.map(event => {
+      if (event.registrations && event.registrations.length > 0) {
+        event.registrations = event.registrations.map(reg => {
+          // If user is populated, use those details
+          if (reg.user && typeof reg.user === 'object') {
+            return {
+              ...reg,
+              name: reg.name || reg.user.name,
+              email: reg.email || reg.user.email,
+              user: reg.user
+            };
+          }
+          // Otherwise keep the stored name/email
+          return reg;
+        });
+      }
+      return event;
+    });
+
+    res.json(eventsWithDetails);
   } catch (error) {
+    console.error('Events GET error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -31,6 +58,10 @@ router.post('/', auth, async (req, res) => {
     });
 
     await event.save();
+    
+    // Populate creator info before sending response
+    await event.populate('createdBy', 'name email batch');
+    
     res.status(201).json({ message: 'Event created successfully', event });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -41,25 +72,41 @@ router.post('/', auth, async (req, res) => {
 router.post('/:id/register', auth, async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
-    
+
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
     // Check if already registered
     const alreadyRegistered = event.registrations.some(
-      reg => reg.user.toString() === req.user._id.toString()
+      reg => reg.user && reg.user.toString() === req.user._id.toString()
     );
 
     if (alreadyRegistered) {
       return res.status(400).json({ message: 'Already registered for this event' });
     }
 
-    event.registrations.push({ user: req.user._id });
+    // Store both the user reference AND the actual name/email as backup
+    const registrant = {
+      user: req.user._id,
+      name: req.user.name || req.user.fullName || '',
+      email: req.user.email || '',
+      registeredAt: new Date()
+    };
+
+    event.registrations.push(registrant);
     await event.save();
 
-    res.json({ message: 'Successfully registered for event', event });
+    // Populate all registrations before sending response
+    await event.populate('registrations.user', 'name email batch');
+    await event.populate('createdBy', 'name email batch');
+
+    res.json({
+      message: 'Successfully registered for event',
+      event: event // Send back the full event with populated data
+    });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
