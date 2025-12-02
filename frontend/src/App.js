@@ -7,6 +7,7 @@ import Events from './components/Events';
 import Jobs from './components/Jobs';
 import Alumni from './components/Alumni';
 import Auth from './components/Auth';
+import AdminDashboard from './components/AdminDashboard'; // 1. Import AdminDashboard
 import './App.css';
 
 const AppContent = () => {
@@ -71,6 +72,8 @@ const AppContent = () => {
                 eventsAPI={eventsAPI} 
                 jobsAPI={jobsAPI} 
                 alumniAPI={alumniAPI} 
+                user={user}                   // <--- This connects the logged-in user data
+                setActiveTab={setActiveTab}   // <--- This makes the buttons clickable
               />
             )}
             {activeTab === 'events' && (
@@ -89,6 +92,11 @@ const AppContent = () => {
               <Alumni 
                 alumniAPI={alumniAPI} 
               />
+            )}
+            
+            {/* 4. Add Admin Dashboard Logic */}
+            {activeTab === 'admin' && user?.role === 'admin' && (
+              <AdminDashboard />
             )}
           </>
         )}

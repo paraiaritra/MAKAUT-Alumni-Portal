@@ -6,12 +6,19 @@ const Navbar = ({ onLoginClick, activeTab, setActiveTab, user, logout }) => {
   const mobileMenuRef = useRef(null);
   const menuButtonRef = useRef(null);
   const tabsRef = useRef([]);
+
+  // Define tabs dynamically based on user role
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
     { id: 'events', label: 'Events', icon: '📅' },
     { id: 'jobs', label: 'Jobs', icon: '💼' },
     { id: 'alumni', label: 'Alumni', icon: '👥' },
   ];
+
+  // Only add Admin tab if the user is an admin
+  if (user?.role === 'admin') {
+    tabs.push({ id: 'admin', label: 'Admin', icon: '🛡️' });
+  }
 
   // Close mobile menu on ESC or click outside
   useEffect(() => {
