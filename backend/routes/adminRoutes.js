@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { protect } = require('../middleware/auth');
+// FIX: Destructure BOTH protect and adminOnly
+const { protect, adminOnly } = require('../middleware/auth');
 
 // @desc    Get all unverified alumni
 // @route   GET /api/admin/unverified
@@ -9,7 +10,6 @@ const { protect } = require('../middleware/auth');
 router.get('/unverified', protect, adminOnly, async (req, res) => {
   try {
     // Fetch users who have role 'alumni' (or 'user') but are NOT verified yet
-    // You can adjust this filter based on your needs
     const users = await User.find({ isVerified: false, role: { $ne: 'admin' } }).select('-password');
     res.json(users);
   } catch (error) {
