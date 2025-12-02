@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Users, Calendar, Briefcase, TrendingUp, Award, MapPin, ShieldCheck, Crown } from 'lucide-react';
-import EditProfileModal from './EditProfileModal'; // Ensure this matches your filename
+import EditProfileModal from './EditProfileModal'; 
 
 const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
   const [stats, setStats] = useState({
@@ -15,9 +15,9 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
   // STATE TO CONTROL MODAL VISIBILITY
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // Helper to refresh data (reload page to show new avatar/status)
+  // Helper to refresh data
   const refreshData = () => {
-    console.log("Data updated");
+    window.location.reload(); 
   };
 
   useEffect(() => {
@@ -95,10 +95,10 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
         />
       </div>
 
-      {/* Welcome Section with User Profile */}
+      {/* Welcome Section */}
       <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl shadow-xl overflow-hidden relative">
         <div className="p-8 text-white relative z-10 flex flex-col md:flex-row items-center gap-6">
-          {/* Profile Picture (Clickable) */}
+          {/* Profile Picture */}
           <div className="relative group cursor-pointer" onClick={() => setShowEditModal(true)}>
             <div className="w-24 h-24 rounded-full border-4 border-white/30 overflow-hidden shadow-lg bg-white/10">
               <img 
@@ -107,7 +107,6 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
                 className="w-full h-full object-cover"
               />
             </div>
-            {/* Hover Edit Overlay */}
             <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                <span className="text-xs font-bold text-white">Edit</span>
             </div>
@@ -135,7 +134,6 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
           </div>
           
           <div className="flex flex-col gap-3">
-             {/* Admin Quick Link */}
              {user?.role === 'admin' && (
                <button 
                 onClick={() => setActiveTab('admin')}
@@ -145,7 +143,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
                </button>
              )}
              
-             {/* Upload/Edit Profile Button - NOW CLICKABLE */}
+             {/* Edit Profile Button (Header) */}
              <button 
                 onClick={() => setShowEditModal(true)} 
                 className="bg-white/20 hover:bg-white/30 text-white border border-white/40 px-6 py-2 rounded-lg font-semibold backdrop-blur-sm transition-all"
@@ -155,7 +153,6 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
           </div>
         </div>
         
-        {/* Background Decorations */}
         <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-64 h-64 bg-pink-500/20 rounded-full blur-3xl"></div>
       </div>
@@ -237,14 +234,16 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
             <Briefcase className="text-purple-600 mb-2" size={24} />
             <p className="font-semibold text-gray-800">Jobs</p>
           </button>
-          <button onClick={() => setShowEditModal(true)} className="p-4 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors text-left">
+          
+          {/* UPDATED: Profile button now switches tab to 'profile' instead of opening modal */}
+          <button onClick={() => setActiveTab('profile')} className="p-4 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors text-left">
             <Award className="text-orange-600 mb-2" size={24} />
             <p className="font-semibold text-gray-800">Profile</p>
           </button>
         </div>
       </div>
 
-      {/* FIX: CONDITIONAL RENDERING - This prevents the modal from opening immediately */}
+      {/* Edit Modal (Conditional Render) */}
       {showEditModal && (
         <EditProfileModal 
           user={user} 
