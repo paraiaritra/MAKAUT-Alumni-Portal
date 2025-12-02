@@ -1,15 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Calendar, Briefcase, TrendingUp, Award, MapPin, ShieldCheck, Crown, Edit3 } from 'lucide-react';
+import { Calendar, MapPin, ExternalLink, ArrowRight, Star, Quote, Phone, Mail, Map } from 'lucide-react';
 import EditProfileModal from './EditProfileModal'; 
 
-const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
-  const [stats, setStats] = useState({
-    events: 0,
-    jobs: 0,
-    alumni: 0,
-  });
-  const [recentEvent, setRecentEvent] = useState(null);
-  const [recentJob, setRecentJob] = useState(null);
+const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginClick }) => {
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // STATE TO CONTROL MODAL VISIBILITY
@@ -17,7 +11,6 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
 
   // Helper to refresh data
   const refreshData = () => {
-    // We avoid window.location.reload() to prevent logging out
     console.log("Profile updated");
   };
 
@@ -27,226 +20,252 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab }) => {
 
   const fetchData = async () => {
     try {
-      const [eventsRes, jobsRes, alumniRes] = await Promise.all([
-        eventsAPI.getAllEvents(),
-        jobsAPI.getAllJobs(),
-        alumniAPI.getAllAlumni(),
-      ]);
-
-      setStats({
-        events: eventsRes?.data?.length || 0,
-        jobs: jobsRes?.data?.length || 0,
-        alumni: alumniRes?.data?.length || 0,
-      });
-
-      if (eventsRes?.data?.length > 0) setRecentEvent(eventsRes.data[0]);
-      if (jobsRes?.data?.length > 0) setRecentJob(jobsRes.data[0]);
+      // We only strictly need events for the homepage now, but keeping others doesn't hurt
+      const eventsRes = await eventsAPI.getAllEvents();
+      if (eventsRes?.data) {
+        // Sort by date and take top 3
+        const sorted = eventsRes.data.sort((a, b) => new Date(a.date) - new Date(b.date));
+        setUpcomingEvents(sorted.slice(0, 3));
+      }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Reusable Clean Stat Card
-  const StatCard = ({ icon: Icon, label, value, colorClass, onClick }) => (
-    <div 
-      onClick={onClick}
-      className="bg-white rounded-xl p-6 shadow-md border-b-4 border-indigo-600 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col items-center text-center group"
-    >
-      <div className={`p-4 rounded-full bg-indigo-50 group-hover:bg-indigo-100 transition-colors mb-4 ${colorClass}`}>
-        <Icon size={32} className="text-indigo-600" />
-      </div>
-      <h3 className="text-3xl font-bold text-gray-800 mb-1">{loading ? '...' : value}</h3>
-      <p className="text-gray-500 font-medium">{label}</p>
-    </div>
-  );
+  // Static Data for Placed Students
+  const placedStudents = [
+    {
+      name: "Samrat Ghosh",
+      company: "Google",
+      role: "Senior Software Engineer",
+      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200&h=200"
+    },
+    {
+      name: "Anupam Yadav",
+      company: "Microsoft",
+      role: "Product Manager",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200&h=200"
+    },
+    {
+      name: "Priya Das",
+      company: "Amazon",
+      role: "Cloud Architect",
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200"
+    }
+  ];
+
+  // Static Data for Gallery
+  const galleryImages = [
+    "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=400",
+    "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=400",
+    "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=400",
+    "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=400",
+    "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=400",
+    "https://images.unsplash.com/photo-1590012314607-6da64f934ef7?auto=format&fit=crop&q=80&w=400"
+  ];
 
   return (
-    <div className="space-y-8 font-sans">
+    <div className="font-sans text-gray-800">
       
-      {/* 1. Hero Section - Dark Professional Theme */}
-      <div className="relative bg-slate-900 rounded-3xl overflow-hidden shadow-2xl min-h-[300px] flex flex-col justify-center text-center px-4">
-        {/* Background Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-900 opacity-95"></div>
-        
-        <div className="relative z-10 py-12">
-          {/* Profile Photo */}
-          <div className="w-28 h-28 mx-auto mb-6 rounded-full border-4 border-white/20 p-1 relative group cursor-pointer" onClick={() => setShowEditModal(true)}>
-             <img 
-                src={user?.profilePicture || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"} 
-                alt="Profile" 
-                className="w-full h-full object-cover rounded-full"
-              />
-              <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
-                 <Edit3 className="text-white w-8 h-8" />
-              </div>
-          </div>
-          
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight uppercase">
-            {user?.name || 'Alumni Member'}
-          </h1>
-          <p className="text-indigo-200 text-lg mb-8 max-w-2xl mx-auto font-light">
-            {user?.role === 'admin' 
-              ? 'Administrator Console • Managed Access' 
-              : 'Welcome to the MAKAUT Alumni Association. Together We Learn, Together We Grow.'}
-          </p>
+      {/* 1. HERO SECTION */}
+      <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl mb-12">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          // CHANGE THE URL INSIDE THE QUOTES BELOW
+          style={{ backgroundImage: 'url("https://makautwb.ac.in/images/slider/banner1.jpg")' }} 
+        >
+          <div className="absolute inset-0 bg-black/60"></div>
+        </div>
 
-          <div className="flex justify-center gap-4">
-             {user?.role === 'admin' && (
-               <button 
-                onClick={() => setActiveTab('admin')}
-                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all flex items-center gap-2 transform hover:scale-105"
-               >
-                 <ShieldCheck size={20} /> Admin Console
-               </button>
-             )}
-             <button 
-                onClick={() => setShowEditModal(true)} 
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-8 py-3 rounded-full font-semibold backdrop-blur-sm transition-all"
-             >
-                Edit Profile
-             </button>
+        {/* Hero Content */}
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight max-w-4xl">
+            Maulana Abul Kalam Azad University of Technology
+          </h1>
+          <p className="text-xl text-gray-200 mb-8 max-w-2xl">
+            Empowering minds, shaping futures, and building a global community of innovators and leaders.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Get Started Button */}
+            {!user ? (
+              <button 
+                onClick={onLoginClick || (() => alert("Please implement onLoginClick in App.js"))} 
+                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3.5 rounded-full font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2"
+              >
+                Get Started <ArrowRight size={20} />
+              </button>
+            ) : (
+              <button 
+                onClick={() => setActiveTab('profile')} 
+                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3.5 rounded-full font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2"
+              >
+                Go to Profile <ArrowRight size={20} />
+              </button>
+            )}
+
+            {/* Our College Button */}
+            <a 
+              href="https://makautwb.ac.in" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-white hover:bg-gray-100 text-indigo-900 px-8 py-3.5 rounded-full font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2"
+            >
+              Our College <ExternalLink size={20} />
+            </a>
           </div>
         </div>
       </div>
 
-      {/* 2. Stats Section - Overlapping the Hero slightly */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 -mt-12 relative z-20 px-4">
-        <StatCard
-          icon={Users}
-          label="Registered Alumni"
-          value={stats.alumni}
-          colorClass="text-blue-600"
-          onClick={() => setActiveTab('alumni')}
-        />
-        <StatCard
-          icon={Calendar}
-          label="Upcoming Events"
-          value={stats.events}
-          colorClass="text-green-600"
-          onClick={() => setActiveTab('events')}
-        />
-        <StatCard
-          icon={Briefcase}
-          label="Active Jobs"
-          value={stats.jobs}
-          colorClass="text-purple-600"
-          onClick={() => setActiveTab('jobs')}
-        />
+      {/* 2. ABOUT & MISSION GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        {[
+          { title: "About Us", desc: "A premier university fostering excellence in technology and management education since 2001.", icon: "🏛️", color: "bg-blue-50 border-blue-200" },
+          { title: "Our Mission", desc: "To provide high-quality education and research opportunities that contribute to national development.", icon: "🎯", color: "bg-green-50 border-green-200" },
+          { title: "Our Plan", desc: "Expanding digital infrastructure and global alumni networks to bridge the gap between industry and academia.", icon: "🚀", color: "bg-purple-50 border-purple-200" },
+          { title: "College Reviews", desc: "Rated 4.8/5 by students and alumni for campus life, placements, and faculty support.", icon: "⭐", color: "bg-yellow-50 border-yellow-200" }
+        ].map((item, index) => (
+          <div key={index} className={`p-6 rounded-xl border ${item.color} shadow-sm hover:shadow-md transition-shadow`}>
+            <div className="text-4xl mb-4">{item.icon}</div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">{item.title}</h3>
+            <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Main Content Area - Left 2 Columns */}
-        <div className="lg:col-span-2 space-y-8">
-          
-          {/* Quick Actions - Styled like "Our Mission" cards from reference */}
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-            <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-              <span className="w-1 h-8 bg-orange-500 rounded-full"></span>
-              Quick Access
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-               {[
-                 { label: 'Directory', icon: Users, tab: 'alumni', color: 'bg-blue-50 text-blue-600' },
-                 { label: 'Events', icon: Calendar, tab: 'events', color: 'bg-green-50 text-green-600' },
-                 { label: 'Jobs', icon: Briefcase, tab: 'jobs', color: 'bg-purple-50 text-purple-600' },
-                 { label: 'View Profile', icon: Award, tab: 'profile', color: 'bg-orange-50 text-orange-600' }
-               ].map((item) => (
-                 <button 
-                   key={item.label}
-                   onClick={() => setActiveTab(item.tab)}
-                   className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all hover:border-orange-200 group bg-white text-left"
-                 >
-                   <div className={`p-3 rounded-lg ${item.color} group-hover:scale-110 transition-transform`}>
-                     <item.icon size={24} />
-                   </div>
-                   <div>
-                     <span className="block font-bold text-gray-800 text-lg">{item.label}</span>
-                     <span className="text-xs text-gray-500">Click to view</span>
-                   </div>
-                 </button>
-               ))}
-            </div>
+      {/* 3. UPCOMING EVENTS */}
+      <div className="mb-16">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">Upcoming Events</h2>
+            <p className="text-gray-500 mt-2">Join us in our upcoming seminars and meetups</p>
           </div>
+          <button onClick={() => setActiveTab('events')} className="text-indigo-600 font-semibold hover:text-indigo-800 hidden sm:block">
+            View All Events &rarr;
+          </button>
+        </div>
 
-          {/* Recent Event - List Style */}
-          {recentEvent && (
-             <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-               <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                 <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                   <Calendar className="text-orange-500" size={20} /> Latest Event
-                 </h3>
-                 <button onClick={() => setActiveTab('events')} className="text-sm text-indigo-600 font-medium hover:underline">View All</button>
-               </div>
-               <div className="p-6 flex flex-col md:flex-row gap-6 items-start">
-                 <div className="bg-indigo-100 text-indigo-700 rounded-xl p-4 text-center min-w-[100px]">
-                    <span className="block text-3xl font-bold">{new Date(recentEvent.date).getDate()}</span>
-                    <span className="text-sm font-bold uppercase">{new Date(recentEvent.date).toLocaleString('default', { month: 'short' })}</span>
-                 </div>
-                 <div>
-                   <h4 className="text-xl font-bold text-gray-800 mb-2">{recentEvent.title}</h4>
-                   <p className="text-gray-600 text-sm mb-4 line-clamp-2">{recentEvent.description}</p>
-                   <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1"><MapPin size={14}/> {recentEvent.location || 'Online'}</span>
-                   </div>
-                 </div>
-               </div>
-             </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {loading ? (
+            <p className="text-center col-span-3 py-8 text-gray-500">Loading events...</p>
+          ) : upcomingEvents.length > 0 ? (
+            upcomingEvents.map((event) => (
+              <div key={event._id} className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-all group">
+                <div className="h-40 bg-indigo-900 relative p-6 flex flex-col justify-center items-center text-white">
+                  <div className="text-4xl mb-2">📅</div>
+                  <span className="font-bold text-lg">{new Date(event.date).toDateString()}</span>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-indigo-600 transition-colors">{event.title}</h3>
+                  <p className="text-gray-600 text-sm line-clamp-2 mb-4">{event.description}</p>
+                  <div className="flex items-center text-gray-500 text-sm gap-2">
+                    <MapPin size={16} /> {event.location || 'Online'}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-3 text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+              <Calendar size={48} className="mx-auto text-gray-300 mb-2"/>
+              <p className="text-gray-500">No upcoming events scheduled.</p>
+            </div>
           )}
         </div>
-
-        {/* Sidebar - Right Column */}
-        <div className="space-y-8">
-           {/* Recent Job Card */}
-           {recentJob ? (
-             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <Briefcase className="text-orange-500" size={20} /> New Opportunity
-                </h3>
-                <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                   <h4 className="font-bold text-gray-900 text-lg">{recentJob.position}</h4>
-                   <p className="text-indigo-600 font-medium text-sm mb-3">{recentJob.company}</p>
-                   <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="px-2 py-1 bg-white border rounded text-xs font-medium text-gray-600">{recentJob.type}</span>
-                      <span className="px-2 py-1 bg-white border rounded text-xs font-medium text-gray-600">{recentJob.location}</span>
-                   </div>
-                   <button onClick={() => setActiveTab('jobs')} className="w-full py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm">
-                     Apply Now
-                   </button>
-                </div>
-             </div>
-           ) : (
-             <div className="bg-gray-50 rounded-2xl p-8 text-center border border-dashed border-gray-300">
-               <Briefcase className="mx-auto text-gray-400 mb-2" size={32}/>
-               <p className="text-gray-500 font-medium">No jobs posted recently</p>
-             </div>
-           )}
-
-           {/* Membership Status Box */}
-           <div className={`rounded-2xl p-6 border ${user?.membershipStatus === 'premium' ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-orange-100' : 'bg-gradient-to-br from-gray-50 to-slate-100 border-gray-200'}`}>
-              <div className="flex items-center gap-3 mb-3">
-                 {user?.membershipStatus === 'premium' ? <Crown className="text-orange-500" size={24} /> : <ShieldCheck className="text-gray-400" size={24} />}
-                 <div>
-                   <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Membership Status</p>
-                   <p className="font-bold text-gray-900 capitalize text-lg">{user?.membershipStatus || 'Free'} Plan</p>
-                 </div>
-              </div>
-              {user?.membershipStatus !== 'premium' && (
-                <button 
-                  onClick={() => setShowEditModal(true)}
-                  className="w-full mt-2 bg-white border border-gray-300 text-gray-700 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors shadow-sm"
-                >
-                  Upgrade Membership
-                </button>
-              )}
-           </div>
-        </div>
-
       </div>
 
-      {/* Edit Modal (Conditional Render) */}
+      {/* 4. PLACED STUDENTS (Success Stories) */}
+      <div className="mb-16 bg-gradient-to-r from-indigo-900 to-slate-900 rounded-3xl p-8 md:p-12 text-white text-center">
+        <h2 className="text-3xl font-bold mb-10">Our Alumni Success Stories</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {placedStudents.map((student, idx) => (
+            <div key={idx} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 hover:bg-white/20 transition-all">
+              <img 
+                src={student.image} 
+                alt={student.name} 
+                className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white/20 object-cover"
+              />
+              <h3 className="text-xl font-bold">{student.name}</h3>
+              <p className="text-orange-400 font-medium mb-1">{student.role}</p>
+              <div className="inline-block bg-white text-indigo-900 px-3 py-1 rounded-full text-xs font-bold mt-2">
+                {student.company}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 5. EVENT GALLERY */}
+      <div className="mb-16">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center">Check Our Event Gallery</h2>
+        <p className="text-gray-500 text-center mb-8">Capturing moments of learning and celebration</p>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {galleryImages.map((img, idx) => (
+            <div key={idx} className="relative group overflow-hidden rounded-xl h-48 sm:h-64 cursor-pointer">
+              <img 
+                src={img} 
+                alt={`Gallery ${idx + 1}`} 
+                className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="text-white font-bold tracking-wider">VIEW</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 6. CONTACT SECTION */}
+      <div className="bg-indigo-50 rounded-3xl p-8 md:p-12 border border-indigo-100">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold text-indigo-900">Contact Us</h2>
+          <p className="text-indigo-600 mt-2">Get in touch with the Alumni Association</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          {/* Address */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MapPin size={24} />
+            </div>
+            <h3 className="font-bold text-gray-800 mb-2">Our Address</h3>
+            <p className="text-gray-600 text-sm">
+              <span className="font-semibold block mb-1">City Office:</span> BF-142, Sector-I, Saltlake City, Kolkata-64
+            </p>
+            <p className="text-gray-600 text-sm mt-2">
+              <span className="font-semibold block mb-1">Main Office:</span> NH12, Simhat, Nadia, West Bengal, 741249
+            </p>
+          </div>
+
+          {/* Email */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Mail size={24} />
+            </div>
+            <h3 className="font-bold text-gray-800 mb-2">Email Us</h3>
+            <a href="mailto:makautwb.alumni@gmail.com" className="text-indigo-600 font-medium hover:underline">
+              makautwb.alumni@gmail.com
+            </a>
+            <p className="text-xs text-gray-400 mt-2">We reply within 24 hours</p>
+          </div>
+
+          {/* Call */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Phone size={24} />
+            </div>
+            <h3 className="font-bold text-gray-800 mb-2">Call Us</h3>
+            <a href="tel:03325891555" className="text-2xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">
+              033 2589 1555
+            </a>
+            <p className="text-xs text-gray-400 mt-2">Mon - Fri, 9am - 5pm</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Edit Modal (Conditional Render - Kept for legacy compatibility if user is logged in and wants to edit) */}
       {showEditModal && (
         <EditProfileModal 
           user={user} 
