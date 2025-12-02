@@ -1,91 +1,64 @@
 const express = require('express');
 const router = express.Router();
 const Job = require('../models/Job');
-// FIX: Destructure 'protect' from the middleware object
-const { protect } = require('../middleware/auth');
+const { protect, adminOnly } = require('../middleware/auth');
 
-// Get all jobs
+// Public: Get all jobs
 router.get('/', async (req, res) => {
   try {
-    const jobs = await Job.find({ isActive: true })
-      .populate('postedBy', 'name email batch')
-      .sort({ createdAt: -1 });
+    const jobs = await Job.find({ isActive: true }).sort({ createdAt: -1 });
     res.json(jobs);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Create job posting (protected)
-// FIX: Use 'protect' instead of 'auth'
-router.post('/', protect, async (req, res) => {
+// Admin Only: Create Job
+router.post('/', protect, adminOnly, async (req, res) => {
   try {
-    const { company, position, description, location, type, salary } = req.body;
-
-    const job = new Job({
-      company,
-      position,
-      description,
-      location,
-      type,
-      salary,
-      postedBy: req.user._id
-    });
-
+    const job = new Job({ ...req.body, postedBy: req.user._id });
     await job.save();
-    res.status(201).json({ message: 'Job posted successfully', job });
+    res.status(201).json({ message: 'Job posted', job });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Apply for job (protected)
-// FIX: Use 'protect' instead of 'auth'
+// User: Apply for job
 router.post('/:id/apply', protect, async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
-    
-    if (!job) {
-      return res.status(404).json({ message: 'Job not found' });
-    }
+    if (!job) return res.status(404).json({ message: 'Job not found' });
 
-    // Check if already applied
-    const alreadyApplied = job.applications.some(
-      app => app.user.toString() === req.user._id.toString()
-    );
-
-    if (alreadyApplied) {
-      return res.status(400).json({ message: 'Already applied for this job' });
-    }
+    const alreadyApplied = job.applications.some(app => app.user.toString() === req.user._id.toString());
+    if (alreadyApplied) return res.status(400).json({ message: 'Already applied' });
 
     job.applications.push({ user: req.user._id });
     await job.save();
-
-    res.json({ message: 'Successfully applied for job', job });
+    res.json({ message: 'Application submitted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Delete job (protected)
-// FIX: Use 'protect' instead of 'auth'
-router.delete('/:id', protect, async (req, res) => {
+// Admin Only: View Applicants (Strict Privacy)
+router.get('/:id/applications', protect, adminOnly, async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id);
-
-    if (!job) {
-      return res.status(404).json({ message: 'Job not found' });
-    }
-
-    // Check if user is the poster
-    if (job.postedBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Not authorized to delete this job' });
-    }
-
-    await Job.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Job deleted successfully' });
+    const job = await Job.findById(req.params.id).populate('applications.user', 'name email batch department profilePicture phone');
+    if (!job) return res.status(404).json({ message: 'Job not found' });
+    res.json(job.applications);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Admin Only: Delete
+router.delete('/:id', protect, adminOnly, async (req, res) => {
+  try {
+    await Job.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Job deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
