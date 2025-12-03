@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { LogOut, Menu, X, GraduationCap } from 'lucide-react';
+import { LogOut, Menu, X, GraduationCap, CreditCard } from 'lucide-react'; // Added CreditCard icon
 
 const Navbar = ({ onLoginClick, activeTab, setActiveTab, user, logout }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -13,6 +13,8 @@ const Navbar = ({ onLoginClick, activeTab, setActiveTab, user, logout }) => {
     { id: 'events', label: 'Events', icon: '📅' },
     { id: 'jobs', label: 'Jobs', icon: '💼' },
     { id: 'alumni', label: 'Alumni', icon: '👥' },
+    // ADDED MEMBERSHIP TAB
+    { id: 'membership', label: 'Membership', icon: '💳' },
   ];
 
   // Only add Admin tab if the user is an admin

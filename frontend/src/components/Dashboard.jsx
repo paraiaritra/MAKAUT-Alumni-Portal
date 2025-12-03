@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, MapPin, ExternalLink, ArrowRight, Heart, Shield, Phone, Mail } from 'lucide-react';
+import { Calendar, MapPin, ExternalLink, ArrowRight, Heart, Shield, Phone, Mail, Crown } from 'lucide-react'; // ADDED Crown
 import EditProfileModal from './EditProfileModal'; 
 import AdminAuth from './AdminAuth';
-import DonateModal from './DonateModal'; // 1. Import DonateModal
+import DonateModal from './DonateModal'; 
 
 const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginClick }) => {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
@@ -10,7 +10,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
   
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [showDonateModal, setShowDonateModal] = useState(false); // 2. New State
+  const [showDonateModal, setShowDonateModal] = useState(false);
 
   const refreshData = () => { console.log("Profile updated"); };
 
@@ -83,22 +83,40 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
         </div>
       )}
 
-      {/* DONATE SECTION */}
+      {/* DONATE & MEMBERSHIP GRID */}
       {user && (
-        <div className="mb-16 bg-gradient-to-r from-pink-600 to-rose-600 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 transform hover:-translate-y-1 transition-transform">
-          <div className="flex items-center gap-4">
-            <div className="bg-white/20 p-4 rounded-full">
-              <Heart size={40} className="text-white fill-current" />
+        <div className="grid md:grid-cols-2 gap-6 mb-16">
+          {/* Donate Card */}
+          <div className="bg-gradient-to-r from-pink-600 to-rose-600 rounded-2xl p-8 text-white shadow-xl flex flex-col justify-between transform hover:-translate-y-1 transition-transform">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="bg-white/20 p-4 rounded-full">
+                <Heart size={32} className="text-white fill-current" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">Donate via UPI</h2>
+                <p className="text-pink-100 text-sm mt-1">Support alumni events and scholarships.</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold">Support Your Alma Mater</h2>
-              <p className="text-pink-100">Your contribution helps us organize better events and scholarship programs.</p>
-            </div>
+            <button onClick={() => setShowDonateModal(true)} className="bg-white text-pink-600 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-pink-50 transition-colors self-start">
+              Donate Now
+            </button>
           </div>
-          {/* 3. Updated onClick Handler */}
-          <button onClick={() => setShowDonateModal(true)} className="bg-white text-pink-600 px-8 py-3 rounded-full font-bold shadow-lg hover:bg-pink-50 transition-colors whitespace-nowrap">
-            Donate Now
-          </button>
+
+          {/* ADDED: Membership Card */}
+          <div className="bg-gradient-to-r from-orange-500 to-amber-600 rounded-2xl p-8 text-white shadow-xl flex flex-col justify-between transform hover:-translate-y-1 transition-transform">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="bg-white/20 p-4 rounded-full">
+                <Crown size={32} className="text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">Premium Membership</h2>
+                <p className="text-orange-100 text-sm mt-1">Get exclusive access to jobs & priority events.</p>
+              </div>
+            </div>
+            <button onClick={() => setActiveTab('membership')} className="bg-white text-orange-600 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-orange-50 transition-colors self-start">
+              {user?.membershipStatus === 'premium' ? 'View Benefits' : 'Upgrade Now'}
+            </button>
+          </div>
         </div>
       )}
 
@@ -193,7 +211,6 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
       {/* MODALS */}
       {showEditModal && <EditProfileModal user={user} onClose={() => setShowEditModal(false)} onUpdateSuccess={refreshData} />}
       {showAdminLogin && <AdminAuth onClose={() => setShowAdminLogin(false)} />}
-      {/* 4. Render Donate Modal */}
       {showDonateModal && <DonateModal onClose={() => setShowDonateModal(false)} />}
     </div>
   );
