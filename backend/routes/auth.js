@@ -107,11 +107,17 @@ router.post('/register', upload.single('photo'), async (req, res) => {
       token,
       user: {
         id: user._id,
-        name: user.name, // Accessing the virtual 'name' field
+        name: user.name,
         email: user.email,
         role: user.role,
         isVerified: user.isVerified,
-        profilePicture: user.profilePicture
+        profilePicture: user.profilePicture,
+        // Send extra details
+        registrationNumber: user.registrationNumber,
+        mobileNumber: user.mobileNumber,
+        gender: user.gender,
+        department: user.department,
+        batch: user.batch
       }
     });
   } catch (err) {
@@ -144,7 +150,13 @@ router.post('/login', async (req, res) => {
         email: user.email,
         role: user.role,
         isVerified: user.isVerified,
-        profilePicture: user.profilePicture
+        profilePicture: user.profilePicture,
+        // Send extra details
+        registrationNumber: user.registrationNumber,
+        mobileNumber: user.mobileNumber,
+        gender: user.gender,
+        department: user.department,
+        batch: user.batch
       }
     });
   } catch (err) {
