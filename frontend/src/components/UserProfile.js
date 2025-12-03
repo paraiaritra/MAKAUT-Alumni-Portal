@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, Mail, Briefcase, MapPin, Calendar, Edit3, Award, BookOpen, Linkedin, Twitter, Globe } from 'lucide-react';
+import { User, Mail, Briefcase, MapPin, Calendar, Edit3, Award, BookOpen, Phone, Hash, Users } from 'lucide-react';
 import { alumniAPI } from '../services/api';
 import EditProfileModal from './EditProfileModal';
 
@@ -8,12 +8,9 @@ const UserProfile = ({ user, onUpdateRefresh }) => {
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // Fetch extended profile data (Bio, Skills, etc.) from Backend
   const fetchProfile = async () => {
     try {
       const { data } = await alumniAPI.getAlumniById(user._id);
-      // The backend returns { user: ..., profile: ... }
-      // We store the 'profile' part which has bio, skills, etc.
       setProfileData(data.profile); 
     } catch (error) {
       console.error("Failed to load profile details", error);
@@ -29,8 +26,8 @@ const UserProfile = ({ user, onUpdateRefresh }) => {
   }, [user]);
 
   const handleUpdateSuccess = () => {
-    fetchProfile(); // Refresh local data immediately
-    if (onUpdateRefresh) onUpdateRefresh(); // Refresh parent/auth data
+    fetchProfile(); 
+    if (onUpdateRefresh) onUpdateRefresh(); 
   };
 
   if (!user) return <div className="p-8 text-center">Please log in.</div>;
@@ -67,50 +64,81 @@ const UserProfile = ({ user, onUpdateRefresh }) => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{user.name}</h1>
             <p className="text-indigo-600 font-medium text-lg mt-1">
-              {profileData?.bio ? profileData.bio.split('.')[0] + '...' : user.department + ' Batch of ' + user.batch}
+              {user.department} • Batch of {user.batch}
             </p>
-            
-            <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-500">
-              {profileData?.company && ( // Use profileData for company/bio
-                <div className="flex items-center gap-1">
-                  <Briefcase size={16} />
-                  <span>{profileData.company}</span>
-                </div>
-              )}
-              {user.location && (
-                <div className="flex items-center gap-1">
-                  <MapPin size={16} />
-                  <span>{user.location}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-1">
-                <Mail size={16} />
-                <span>{user.email}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Calendar size={16} />
-                <span>Class of {user.batch}</span>
-              </div>
-            </div>
+            {profileData?.bio && (
+              <p className="text-gray-500 mt-2 italic">"{profileData.bio}"</p>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Column - Bio & Skills */}
-        <div className="md:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* Personal Details */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <User size={20} className="text-indigo-500" /> Personal Details
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Hash size={20} className="text-gray-400" />
+              <div>
+                <p className="text-xs text-gray-500">Registration Number</p>
+                <p className="font-medium text-gray-800">{user.registrationNumber || 'N/A'}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Mail size={20} className="text-gray-400" />
+              <div>
+                <p className="text-xs text-gray-500">Email</p>
+                <p className="font-medium text-gray-800">{user.email}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Phone size={20} className="text-gray-400" />
+              <div>
+                <p className="text-xs text-gray-500">Phone</p>
+                <p className="font-medium text-gray-800">{user.mobileNumber || 'N/A'}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Users size={20} className="text-gray-400" />
+              <div>
+                <p className="text-xs text-gray-500">Gender</p>
+                <p className="font-medium text-gray-800">{user.gender || 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Professional Details */}
+        <div className="space-y-6">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <User size={20} className="text-indigo-500" /> About
+              <Briefcase size={20} className="text-indigo-500" /> Professional Info
             </h3>
-            <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-              {profileData?.bio || "No bio added yet. Click 'Edit Profile' to introduce yourself!"}
-            </p>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <Briefcase size={20} className="text-gray-400" />
+                <div>
+                  <p className="text-xs text-gray-500">Current Company</p>
+                  <p className="font-medium text-gray-800">{user.company || profileData?.company || 'Not Added'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <MapPin size={20} className="text-gray-400" />
+                <div>
+                  <p className="text-xs text-gray-500">Location</p>
+                  <p className="font-medium text-gray-800">{user.location || 'Not Added'}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <BookOpen size={20} className="text-indigo-500" /> Skills & Expertise
+              <BookOpen size={20} className="text-indigo-500" /> Skills
             </h3>
             {profileData?.skills && profileData.skills.length > 0 ? (
               <div className="flex flex-wrap gap-2">
@@ -125,26 +153,8 @@ const UserProfile = ({ user, onUpdateRefresh }) => {
             )}
           </div>
         </div>
-
-        {/* Right Column - Membership Info */}
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Membership</h3>
-            <div className={`p-4 rounded-xl border ${user.membershipStatus === 'premium' ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
-              <p className="font-semibold text-gray-900 capitalize">
-                {user.membershipStatus === 'premium' ? 'Premium Member 🌟' : 'Free Member'}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                {user.membershipStatus === 'premium' && user.membershipExpiry 
-                  ? 'Valid until ' + new Date(user.membershipExpiry).toLocaleDateString() 
-                  : 'Upgrade to access exclusive events'}
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Render Edit Modal inside Profile Page */}
       {showEditModal && (
         <EditProfileModal 
           user={user} 
