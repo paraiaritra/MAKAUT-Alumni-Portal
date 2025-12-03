@@ -20,9 +20,31 @@ const AdminAuth = ({ onClose }) => {
         await login({ email: formData.email, password: formData.password });
         onClose(); 
       } else {
-        // Register using Secret Key
-        // Passing 'ADMIN' as batch/dept since admins don't have course details
-        await authAPI.register({ ...formData, batch: 'ADMIN', department: 'ADMIN' });
+        // --- FIX FOR "REQUIRED FIELDS" ERROR ---
+        // The backend now expects specific fields like firstName, lastName, regNo.
+        // We auto-generate these for Admins since the form only asks for "Name".
+        
+        const nameParts = formData.name.trim().split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ') || 'Admin'; // Default last name if missing
+
+        // We use FormData because the backend expects multipart/form-data now
+        const adminPayload = new FormData();
+        adminPayload.append('firstName', firstName);
+        adminPayload.append('lastName', lastName);
+        adminPayload.append('email', formData.email);
+        adminPayload.append('password', formData.password);
+        adminPayload.append('adminSecret', formData.adminSecret);
+        
+        // Fill required student fields with Admin dummy data
+        adminPayload.append('registrationNumber', `ADMIN-${Date.now()}`); // Unique ID
+        adminPayload.append('mobileNumber', '0000000000');
+        adminPayload.append('gender', 'Other');
+        adminPayload.append('course', 'ADMINISTRATION');
+        adminPayload.append('passoutYear', '2025');
+
+        // Register using the compatible payload
+        await authAPI.register(adminPayload);
         
         // Auto login after reg
         await login({ email: formData.email, password: formData.password });
@@ -30,7 +52,6 @@ const AdminAuth = ({ onClose }) => {
       }
     } catch (err) {
       console.error("Admin Auth Error:", err);
-      // FIX: Show the specific message from the backend if available
       const backendMessage = err.response?.data?.message;
       setError(backendMessage || 'Authentication failed. Check credentials or Secret Key.');
     } finally {
