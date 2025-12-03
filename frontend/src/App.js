@@ -10,7 +10,7 @@ import Auth from './components/Auth';
 import AdminDashboard from './components/AdminDashboard';
 import UserProfile from './components/UserProfile';
 import Membership from './components/Membership'; 
-import { MapPin, Phone, Mail, ArrowRight, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react'; // Import Facebook Icon
+import { MapPin, Phone, Mail, ArrowRight, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react'; 
 import './App.css';
 
 const AppContent = () => {

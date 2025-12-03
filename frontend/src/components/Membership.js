@@ -29,7 +29,7 @@ const Membership = ({ user, onUpdateSuccess }) => {
       
       // 2. Razorpay Options
       const options = {
-        key: "rzp_test_Rmm7Aii5K66Xvo", // Your Key ID
+        key: "rzp_test_Rmm7Aii5KXvo", // Corrected Key ID
         amount: orderRes.data.amount,
         currency: orderRes.data.currency,
         name: 'MAKAUT Alumni Association',
