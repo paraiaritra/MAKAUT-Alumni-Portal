@@ -15,10 +15,15 @@ const razorpay = new Razorpay({
 router.post('/create-order', protect, async (req, res) => {
   try {
     const { amount } = req.body; 
+    
+    // FIX: Shorten the receipt ID to meet Razorpay's 40 char limit
+    // Date.now() is 13 chars. 'rcpt_' is 5 chars. Total 18 chars. Safe.
+    const shortReceiptId = `rcpt_${Date.now()}`;
+
     const options = {
       amount: amount * 100, // Convert to paise
       currency: 'INR',
-      receipt: `receipt_${Date.now()}_${req.user._id}`,
+      receipt: shortReceiptId, 
     };
 
     const order = await razorpay.orders.create(options);
