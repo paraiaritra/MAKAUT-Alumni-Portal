@@ -93,7 +93,8 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
       {/* 1. HERO SECTION */}
       <div className="relative h-[600px] rounded-3xl overflow-hidden shadow-2xl">
         <div className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 hover:scale-105" style={{ backgroundImage: 'url("https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702811/main_pic_makaut_nfnrzv.jpg")' }}>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/80"></div>
+          {/* Adjusted opacity from black/80 via-black/40 to-black/80 to make it brighter */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/30 to-black/70"></div>
         </div>
 
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 max-w-6xl mx-auto">
