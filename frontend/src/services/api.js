@@ -5,7 +5,6 @@ const API_URL = `${BASE.replace(/\/+$/, '')}/api`;
 
 const api = axios.create({ baseURL: API_URL });
 
-// Interceptor to add Token to requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -25,22 +24,18 @@ export const authAPI = {
 
 export const eventsAPI = {
   getAllEvents: () => api.get('/events'),
-  // Admin Only
   createEvent: (data) => api.post('/events', data),
+  registerForEvent: (id) => api.post(`/events/${id}/register`),
   deleteEvent: (id) => api.delete(`/events/${id}`),
   getParticipants: (id) => api.get(`/events/${id}/participants`),
-  // User Only
-  registerForEvent: (id) => api.post(`/events/${id}/register`),
 };
 
 export const jobsAPI = {
   getAllJobs: () => api.get('/jobs'),
-  // Admin Only
   createJob: (data) => api.post('/jobs', data),
+  applyForJob: (id) => api.post(`/jobs/${id}/apply`),
   deleteJob: (id) => api.delete(`/jobs/${id}`),
   getApplications: (id) => api.get(`/jobs/${id}/applications`),
-  // User Only
-  applyForJob: (id) => api.post(`/jobs/${id}/apply`),
 };
 
 export const alumniAPI = {
@@ -58,6 +53,7 @@ export const paymentAPI = {
 export const adminAPI = {
   getUnverifiedUsers: () => api.get('/admin/unverified'),
   verifyUser: (id) => api.post(`/admin/verify/${id}`),
+  getPremiumMembers: () => api.get('/admin/members'), // NEW
 };
 
 export const contactAPI = {

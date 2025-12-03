@@ -1,173 +1,123 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { Search } from 'lucide-react';
-import { alumniAPI } from '../services/api';
+import React, { useEffect, useState } from 'react';
+import { Search, MapPin, Briefcase, GraduationCap, X, Mail, Phone, User, Calendar, BookOpen } from 'lucide-react';
 
-const Alumni = () => {
-  const [alumni, setAlumni] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+const Alumni = ({ alumniAPI }) => {
+  const [alumniList, setAlumniList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [debouncedTerm, setDebouncedTerm] = useState('');
-  const debounceRef = useRef(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedAlumni, setSelectedAlumni] = useState(null); // For Modal
 
   useEffect(() => {
     fetchAlumni();
   }, []);
 
   const fetchAlumni = async () => {
-    setLoading(true);
-    setError(null);
     try {
-      const response = await alumniAPI.getAllAlumni();
-      setAlumni(response.data || []);
-    } catch (err) {
-      console.error('Error fetching alumni:', err);
-      setError('Failed to load alumni. Please try again later.');
+      const { data } = await alumniAPI.getAllAlumni();
+      setAlumniList(data);
+    } catch (error) {
+      console.error("Error fetching alumni:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Debounce search term (300ms)
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setDebouncedTerm(searchTerm.trim());
-    }, 300);
-    return () => clearTimeout(debounceRef.current);
-  }, [searchTerm]);
-
-  // Memoized filtered list
-  const filteredAlumni = useMemo(() => {
-    if (!debouncedTerm) return alumni;
-    const q = debouncedTerm.toLowerCase();
-    return alumni.filter((person = {}) => {
-      const name = (person.name || '').toString().toLowerCase();
-      const dept = (person.department || '').toString().toLowerCase();
-      const batch = (person.batch ?? '').toString().toLowerCase();
-      return (
-        name.includes(q) ||
-        dept.includes(q) ||
-        batch.includes(q)
-      );
-    });
-  }, [alumni, debouncedTerm]);
-
-  const handleConnect = (person) => {
-    // placeholder — add real connect logic or modal
-    alert(`Connect request sent to ${person.name || 'alumnus'}`);
-  };
-
-  const initialsFromName = (name = '') => {
-    if (!name) return 'MA';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  };
+  const filteredAlumni = alumniList.filter(a => 
+    a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    a.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    a.company?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <section className="space-y-4" aria-labelledby="alumni-heading">
-      <div className="flex justify-between items-center">
-        <h2 id="alumni-heading" className="text-2xl font-bold text-gray-800">Alumni Directory</h2>
-
-        <div className="flex gap-2 items-center" role="search" aria-label="Search alumni">
-          <label htmlFor="alumni-search" className="sr-only">Search alumni</label>
-          <input
-            id="alumni-search"
-            type="text"
-            placeholder="Search alumni by name, department or batch..."
+    <div className="space-y-6">
+      {/* Header & Search */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Alumni Directory</h2>
+          <p className="text-gray-500">Connect with {alumniList.length} graduates</p>
+        </div>
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <input 
+            type="text" 
+            placeholder="Search by name, company, or batch..." 
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            aria-label="Search alumni by name, department or batch"
           />
-          <button
-            type="button"
-            aria-label="Clear search"
-            className="px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition"
-            onClick={() => setSearchTerm('')}
-            title="Clear search"
-          >
-            Clear
-          </button>
-          <button
-            type="button"
-            aria-label="Search"
-            className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-200"
-            onClick={() => setDebouncedTerm(searchTerm.trim())}
-            title="Apply search"
-          >
-            <Search size={18} />
-          </button>
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="spinner" role="status" aria-label="Loading alumni"></div>
-        </div>
-      ) : error ? (
-        <div className="text-red-600 p-4 bg-red-50 border border-red-100 rounded">
-          {error}
-        </div>
-      ) : (
-        <>
-          <p className="text-sm text-gray-600">
-            Showing <strong>{filteredAlumni.length}</strong> {filteredAlumni.length === 1 ? 'result' : 'results'}{debouncedTerm ? ` for “${debouncedTerm}”` : ''}
-          </p>
-
-          {filteredAlumni.length === 0 ? (
-            <div className="p-8 text-center text-gray-600" aria-live="polite">
-              No alumni found. Try a different search or <button type="button" onClick={() => setSearchTerm('')} className="underline">clear search</button>.
+      {/* Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading ? (
+          <p className="col-span-3 text-center py-10">Loading directory...</p>
+        ) : filteredAlumni.map((alum) => (
+          <div 
+            key={alum._id} 
+            onClick={() => setSelectedAlumni(alum)}
+            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all group"
+          >
+            <img 
+              src={alum.profilePicture || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"} 
+              alt={alum.name} 
+              className="w-16 h-16 rounded-full object-cover border-2 border-indigo-50"
+            />
+            <div>
+              <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{alum.name}</h3>
+              <p className="text-sm text-gray-500">{alum.department} • {alum.batch}</p>
+              {alum.company && (
+                <div className="flex items-center gap-1 text-xs text-indigo-600 mt-1 font-medium">
+                  <Briefcase size={12} /> {alum.company}
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" role="list" aria-label="Alumni list">
-              {filteredAlumni.map((person) => {
-                const id = person._id || person.id || person.email || Math.random().toString(36).slice(2, 9);
-                return (
-                  <article
-                    key={id}
-                    role="listitem"
-                    className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition duration-200"
-                    aria-labelledby={`alumni-name-${id}`}
-                  >
-                    <div className="flex items-center gap-4 mb-4">
-                      <div
-                        className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold"
-                        aria-hidden="true"
-                      >
-                        {initialsFromName(person.name)}
-                      </div>
-                      <div>
-                        <h3 id={`alumni-name-${id}`} className="font-bold text-gray-800">
-                          {person.name || 'Unknown'}
-                        </h3>
-                        <p className="text-sm text-gray-600">Batch of {person.batch ?? 'N/A'}</p>
-                      </div>
-                    </div>
+          </div>
+        ))}
+      </div>
 
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-700">🎓 {person.department || 'N/A'}</p>
-                      <p className="text-sm text-gray-700">💼 {person.company || 'N/A'}</p>
-                      <p className="text-sm text-gray-700">📧 {person.email || 'N/A'}</p>
-                    </div>
+      {/* Alumni Detail Modal */}
+      {selectedAlumni && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden relative">
+            <button 
+              onClick={() => setSelectedAlumni(null)}
+              className="absolute top-4 right-4 bg-black/20 hover:bg-black/40 text-white p-1 rounded-full z-10 transition-colors"
+            >
+              <X size={20} />
+            </button>
 
-                    <button
-                      type="button"
-                      onClick={() => handleConnect(person)}
-                      className="mt-4 w-full bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 transition duration-200 font-medium"
-                      aria-label={`Connect with ${person.name || 'alumnus'}`}
-                    >
-                      Connect
-                    </button>
-                  </article>
-                );
-              })}
+            {/* Banner & Header */}
+            <div className="h-28 bg-gradient-to-r from-indigo-600 to-purple-600"></div>
+            <div className="px-8 pb-8 -mt-12 text-center">
+              <img 
+                src={selectedAlumni.profilePicture || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"} 
+                alt={selectedAlumni.name} 
+                className="w-32 h-32 rounded-full border-4 border-white shadow-lg mx-auto object-cover bg-white"
+              />
+              <h2 className="text-2xl font-bold text-gray-900 mt-4">{selectedAlumni.name}</h2>
+              <p className="text-indigo-600 font-medium">{selectedAlumni.department} Class of {selectedAlumni.batch}</p>
+              
+              <div className="mt-6 space-y-3 text-left">
+                {selectedAlumni.company && (
+                  <div className="flex items-center gap-3 text-gray-700 p-3 bg-gray-50 rounded-lg">
+                    <Briefcase size={20} className="text-indigo-500" />
+                    <span>Works at <strong>{selectedAlumni.company}</strong></span>
+                  </div>
+                )}
+                {selectedAlumni.email && (
+                  <div className="flex items-center gap-3 text-gray-700 p-3 bg-gray-50 rounded-lg">
+                    <Mail size={20} className="text-indigo-500" />
+                    <a href={`mailto:${selectedAlumni.email}`} className="hover:text-indigo-600">{selectedAlumni.email}</a>
+                  </div>
+                )}
+                {/* Additional details can be fetched here if needed */}
+              </div>
             </div>
-          )}
-        </>
+          </div>
+        </div>
       )}
-    </section>
+    </div>
   );
 };
 
