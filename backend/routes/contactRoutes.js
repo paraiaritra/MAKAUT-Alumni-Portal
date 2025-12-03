@@ -9,31 +9,40 @@ router.post('/', async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
 
-    // 1. Save to Database (So Admin Portal still works)
+    // 1. Save to Database (So it appears in Admin Portal)
     await Contact.create({ name, email, message });
 
-    // 2. Send Email to You (paraitiku11@gmail.com)
+    // 2. Send Email
     // Only attempts to send if credentials exist in .env
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: process.env.EMAIL_USER, // Your email
+          user: process.env.EMAIL_USER, // Your sender email (paraitiku11@gmail.com)
           pass: process.env.EMAIL_PASS, // Your App Password
         },
       });
 
       const mailOptions = {
-        from: `"${name}" <${email}>`, // Shows sender's name
-        to: 'paraitiku11@gmail.com',   // WHERE TO SEND
-        subject: `Alumni Portal Contact: ${subject}`,
+        // The email MUST be sent FROM the authenticated account to work reliably
+        from: `"Alumni Portal" <${process.env.EMAIL_USER}>`,
+        
+        // When you click reply in your inbox, it will go to the USER'S email
+        replyTo: email, 
+        
+        // This is where you receive the notification
+        to: 'paraibabuaritra@gmail.com',   
+        
+        subject: `New Message: ${subject}`,
         text: `
-          New Message from Alumni Portal:
-          
-          Name: ${name}
-          Email: ${email}
-          Subject: ${subject}
-          
+          You have received a new inquiry from the Alumni Portal.
+
+          --------------------------------------------------
+          Sender Name:  ${name}
+          Sender Email: ${email}
+          Subject:      ${subject}
+          --------------------------------------------------
+
           Message:
           ${message}
         `,
