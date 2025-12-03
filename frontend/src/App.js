@@ -10,7 +10,7 @@ import Auth from './components/Auth';
 import AdminDashboard from './components/AdminDashboard';
 import UserProfile from './components/UserProfile';
 import Membership from './components/Membership'; 
-import { MapPin, Phone, Mail, ArrowRight, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react'; 
+import { MapPin, Phone, Mail, ArrowRight, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react'; // Import Facebook Icon
 import './App.css';
 
 const AppContent = () => {
@@ -177,7 +177,7 @@ const AppContent = () => {
               <h3 className="text-white text-lg font-bold mb-4 border-b-2 border-orange-500 inline-block pb-1">Follow Us</h3>
               <p className="text-sm mb-4">Connect with us on social media for updates.</p>
               <div className="flex gap-4">
-                {/* Updated Facebook Link */}
+                {/* Facebook Link Added Here */}
                 <a 
                   href="https://www.facebook.com/profile.php?id=100066605254613" 
                   target="_blank" 
