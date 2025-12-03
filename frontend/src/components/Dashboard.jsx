@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, MapPin, ExternalLink, ArrowRight, Heart, Shield, Phone, Mail } from 'lucide-react';
+import { Calendar, MapPin, ExternalLink, ArrowRight, Heart, Shield, Phone, Mail, Crown, BookOpen, Target, Compass, Award } from 'lucide-react';
 import EditProfileModal from './EditProfileModal'; 
 import AdminAuth from './AdminAuth';
 import DonateModal from './DonateModal'; 
@@ -29,6 +29,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
     finally { setLoading(false); }
   };
 
+  // Static Data
   const placedStudents = [
     { name: "Pravin Pandey", company: "Google", role: "Senior Software Engineer", image: "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702803/WhatsApp_Image_2025-12-03_at_00.42.37_aefca4ab_hyyaox.jpg" },
     { name: "Anupam Yadav", company: "Microsoft", role: "Product Manager", image: "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764701602/Screenshot_2025-12-03_002257_fd5lik.png" },
@@ -39,6 +40,34 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
     "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702282/IMG-20251203-WA0015_dmf5jt.jpg",
     "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702282/IMG-20251203-WA0017_veqgxx.jpg",
     "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702281/IMG-20251203-WA0014_rw193d.jpg"
+  ];
+
+  // Professional Section Data
+  const aboutSections = [
+    { 
+      title: "About Us", 
+      icon: <BookOpen size={32} className="text-blue-600" />, 
+      desc: "MAKAUT, formerly WBUT, is a premier state university fostering excellence in technology and management since 2001.",
+      color: "bg-blue-50 border-blue-100"
+    },
+    { 
+      title: "Our Mission", 
+      icon: <Target size={32} className="text-red-600" />, 
+      desc: "To provide high-quality education and research opportunities that contribute to national development and global recognition.",
+      color: "bg-red-50 border-red-100"
+    },
+    { 
+      title: "Our Plan", 
+      icon: <Compass size={32} className="text-green-600" />, 
+      desc: "Expanding digital infrastructure and building a strong global alumni network to bridge the gap between industry and academia.",
+      color: "bg-green-50 border-green-100"
+    },
+    { 
+      title: "Our Goals", 
+      icon: <Award size={32} className="text-purple-600" />, 
+      desc: "To become a hub of innovation and entrepreneurship, empowering students to become leaders in their respective fields.",
+      color: "bg-purple-50 border-purple-100"
+    }
   ];
 
   return (
@@ -74,37 +103,66 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
         </div>
       </div>
 
-      {/* ADMIN LOGIN BUTTON (Restored) */}
+      {/* 2. ABOUT, MISSION, PLAN, GOALS (NEW SECTION) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 px-2">
+        {aboutSections.map((item, idx) => (
+          <div key={idx} className={`p-6 rounded-2xl border ${item.color} hover:shadow-lg transition-shadow cursor-default`}>
+            <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
+              {item.icon}
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">{item.title}</h3>
+            <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ADMIN LOGIN BUTTON */}
       {!user && (
         <div className="fixed bottom-6 right-6 z-40">
-          <button 
-            onClick={() => setShowAdminLogin(true)} 
-            className="bg-slate-800 text-white p-3 rounded-full shadow-xl hover:bg-slate-900 border border-slate-700 flex items-center gap-2 text-sm font-bold pr-5 transition-transform hover:scale-105"
-          >
+          <button onClick={() => setShowAdminLogin(true)} className="bg-slate-800 text-white p-3 rounded-full shadow-xl hover:bg-slate-900 border border-slate-700 flex items-center gap-2 text-sm font-bold pr-5 transition-transform hover:scale-105">
             <Shield size={18} className="text-red-500" /> Admin Portal
           </button>
         </div>
       )}
 
-      {/* DONATE SECTION */}
+      {/* 3. DONATE & MEMBERSHIP GRID */}
       {user && (
-        <div className="mb-16 bg-gradient-to-r from-pink-600 to-rose-600 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 transform hover:-translate-y-1 transition-transform">
-          <div className="flex items-center gap-4">
-            <div className="bg-white/20 p-4 rounded-full">
-              <Heart size={40} className="text-white fill-current" />
+        <div className="grid md:grid-cols-2 gap-6 mb-16">
+          {/* Donate Card */}
+          <div className="bg-gradient-to-r from-pink-600 to-rose-600 rounded-2xl p-8 text-white shadow-xl flex flex-col justify-between transform hover:-translate-y-1 transition-transform">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="bg-white/20 p-4 rounded-full">
+                <Heart size={32} className="text-white fill-current" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">Support Your Alma Mater</h2>
+                <p className="text-pink-100 text-sm mt-1">Your contribution helps us organize better events.</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold">Support Your Alma Mater</h2>
-              <p className="text-pink-100">Your contribution helps us organize better events and scholarship programs.</p>
-            </div>
+            <button onClick={() => setShowDonateModal(true)} className="bg-white text-pink-600 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-pink-50 transition-colors self-start">
+              Donate Now
+            </button>
           </div>
-          <button onClick={() => setShowDonateModal(true)} className="bg-white text-pink-600 px-8 py-3 rounded-full font-bold shadow-lg hover:bg-pink-50 transition-colors whitespace-nowrap">
-            Donate Now
-          </button>
+
+          {/* Membership Card */}
+          <div className="bg-gradient-to-r from-orange-500 to-amber-600 rounded-2xl p-8 text-white shadow-xl flex flex-col justify-between transform hover:-translate-y-1 transition-transform">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="bg-white/20 p-4 rounded-full">
+                <Crown size={32} className="text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">Premium Membership</h2>
+                <p className="text-orange-100 text-sm mt-1">Get exclusive access to jobs & priority events.</p>
+              </div>
+            </div>
+            <button onClick={() => setActiveTab('membership')} className="bg-white text-orange-600 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-orange-50 transition-colors self-start">
+              {user?.membershipStatus === 'premium' ? 'View Benefits' : 'Upgrade Now'}
+            </button>
+          </div>
         </div>
       )}
 
-      {/* 3. UPCOMING EVENTS */}
+      {/* 4. UPCOMING EVENTS */}
       <div className="mb-16">
         <div className="flex justify-between items-end mb-8">
           <div>
@@ -136,7 +194,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
         </div>
       </div>
 
-      {/* 4. PLACED STUDENTS */}
+      {/* 5. PLACED STUDENTS */}
       <div className="mb-16 bg-gradient-to-r from-indigo-900 to-slate-900 rounded-3xl p-8 md:p-12 text-white text-center">
         <h2 className="text-3xl font-bold mb-10">Our Alumni Success Stories</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -151,7 +209,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
         </div>
       </div>
 
-      {/* 5. EVENT GALLERY */}
+      {/* 6. EVENT GALLERY */}
       <div className="mb-16">
         <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center">Check Our Event Gallery</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
@@ -163,7 +221,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
         </div>
       </div>
 
-      {/* 6. CONTACT SECTION */}
+      {/* 7. CONTACT SECTION */}
       <div className="bg-indigo-50 rounded-3xl p-8 md:p-12 border border-indigo-100 mb-12">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-indigo-900">Contact Us</h2>
