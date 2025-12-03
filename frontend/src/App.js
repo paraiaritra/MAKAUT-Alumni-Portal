@@ -9,13 +9,15 @@ import Alumni from './components/Alumni';
 import Auth from './components/Auth';
 import AdminDashboard from './components/AdminDashboard';
 import UserProfile from './components/UserProfile';
-import Membership from './components/Membership'; // IMPORT MEMBERSHIP
+import Membership from './components/Membership'; 
 import './App.css';
 
 const AppContent = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { user, loading, login, register, logout } = useAuth();
+  
+  // Import refreshUser from context
+  const { user, loading, login, register, logout, refreshUser } = useAuth();
   
   const [loadingMessage, setLoadingMessage] = useState('Loading MAKAUT Alumni Portal...');
   const [showTechTip, setShowTechTip] = useState(false);
@@ -37,8 +39,9 @@ const AppContent = () => {
     };
   }, [loading]);
 
-  const handleRefresh = () => {
-    window.location.reload(); 
+  // Updated Handler: Uses context instead of window.reload
+  const handleRefresh = async () => {
+    await refreshUser(); 
   };
 
   if (loading) {
@@ -105,7 +108,7 @@ const AppContent = () => {
             {activeTab === 'alumni' && <Alumni alumniAPI={alumniAPI} />}
             {activeTab === 'profile' && <UserProfile user={user} onUpdateRefresh={handleRefresh} />}
             
-            {/* ADDED MEMBERSHIP ROUTE */}
+            {/* Membership Route passing handleRefresh */}
             {activeTab === 'membership' && (
               <Membership user={user} onUpdateSuccess={handleRefresh} />
             )}

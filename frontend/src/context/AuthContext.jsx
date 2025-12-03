@@ -1,63 +1,65 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { authAPI } from '../services/api';
 
 const AuthContext = createContext();
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Load user on startup
   useEffect(() => {
-    checkAuth();
+    const loadUser = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const { data } = await authAPI.getCurrentUser();
+          setUser(data);
+        } catch (error) {
+          console.error("Token invalid or expired");
+          localStorage.removeItem('token');
+        }
+      }
+      setLoading(false);
+    };
+    loadUser();
   }, []);
 
-  const checkAuth = async () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const response = await authAPI.getCurrentUser();
-        setUser(response.data.user);
-      } catch (error) {
-        localStorage.removeItem('token');
-      }
-    }
-    setLoading(false);
-  };
-
+  // Login Function
   const login = async (credentials) => {
-    const response = await authAPI.login(credentials);
-    localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
-    return response.data;
+    const { data } = await authAPI.login(credentials);
+    localStorage.setItem('token', data.token);
+    setUser(data.user);
   };
 
+  // Register Function
   const register = async (userData) => {
-    const response = await authAPI.register(userData);
-    localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
-    return response.data;
+    const { data } = await authAPI.register(userData);
+    localStorage.setItem('token', data.token);
+    setUser(data.user);
   };
 
+  // Logout Function
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
   };
 
-  const value = {
-    user,
-    login,
-    register,
-    logout,
-    loading,
+  // NEW: Function to refresh user data without reloading page
+  const refreshUser = async () => {
+    try {
+      const { data } = await authAPI.getCurrentUser();
+      setUser(data); // This updates the UI instantly
+    } catch (error) {
+      console.error("Failed to refresh user data");
+    }
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
