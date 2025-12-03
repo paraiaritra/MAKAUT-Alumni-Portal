@@ -10,14 +10,13 @@ import Auth from './components/Auth';
 import AdminDashboard from './components/AdminDashboard';
 import UserProfile from './components/UserProfile';
 import Membership from './components/Membership'; 
-import { MapPin, Phone, Mail, ArrowRight, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react'; // Import icons for footer
+import { MapPin, Phone, Mail, ArrowRight, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react'; 
 import './App.css';
 
 const AppContent = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showAuthModal, setShowAuthModal] = useState(false);
   
-  // Import refreshUser from context
   const { user, loading, login, register, logout, refreshUser } = useAuth();
   
   const [loadingMessage, setLoadingMessage] = useState('Loading MAKAUT Alumni Portal...');
@@ -40,7 +39,6 @@ const AppContent = () => {
     };
   }, [loading]);
 
-  // Updated Handler: Uses context instead of window.reload
   const handleRefresh = async () => {
     await refreshUser(); 
   };
@@ -109,7 +107,6 @@ const AppContent = () => {
             {activeTab === 'alumni' && <Alumni alumniAPI={alumniAPI} />}
             {activeTab === 'profile' && <UserProfile user={user} onUpdateRefresh={handleRefresh} />}
             
-            {/* Membership Route passing handleRefresh */}
             {activeTab === 'membership' && (
               <Membership user={user} onUpdateSuccess={handleRefresh} />
             )}
@@ -124,7 +121,6 @@ const AppContent = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             
-            {/* Column 1: Alumni Association Info */}
             <div className="space-y-4">
               <h3 className="text-white text-lg font-bold mb-4 border-b-2 border-orange-500 inline-block pb-1">Alumni Association</h3>
               <div className="flex items-start gap-3">
@@ -151,7 +147,6 @@ const AppContent = () => {
               </div>
             </div>
 
-            {/* Column 2: Useful Links */}
             <div>
               <h3 className="text-white text-lg font-bold mb-4 border-b-2 border-orange-500 inline-block pb-1">Useful Links</h3>
               <ul className="space-y-2 text-sm">
@@ -160,11 +155,9 @@ const AppContent = () => {
                 <li><a href="#" className="hover:text-orange-500 transition-colors flex items-center gap-2"><span className="text-orange-500">›</span> Terms of Service</a></li>
                 <li><a href="#" className="hover:text-orange-500 transition-colors flex items-center gap-2"><span className="text-orange-500">›</span> Privacy Policy</a></li>
                 <li><a href="#" className="hover:text-orange-500 transition-colors flex items-center gap-2"><span className="text-orange-500">›</span> Upcoming Events</a></li>
-                <li><a href="#" className="hover:text-orange-500 transition-colors flex items-center gap-2"><span className="text-orange-500">›</span> Alumni Meet 2025</a></li>
               </ul>
             </div>
 
-            {/* Column 3: Newsletter */}
             <div>
               <h3 className="text-white text-lg font-bold mb-4 border-b-2 border-orange-500 inline-block pb-1">Our Newsletter</h3>
               <p className="text-sm mb-4">Want to subscribe to our newsletter? Stay updated with the latest news and events.</p>
@@ -180,12 +173,19 @@ const AppContent = () => {
               </form>
             </div>
 
-            {/* Column 4: Socials (Optional but good for layout) */}
             <div>
               <h3 className="text-white text-lg font-bold mb-4 border-b-2 border-orange-500 inline-block pb-1">Follow Us</h3>
               <p className="text-sm mb-4">Connect with us on social media for updates.</p>
               <div className="flex gap-4">
-                <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all"><Facebook size={20} /></a>
+                {/* Updated Facebook Link */}
+                <a 
+                  href="https://www.facebook.com/profile.php?id=100066605254613" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all"
+                >
+                  <Facebook size={20} />
+                </a>
                 <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-sky-500 hover:text-white transition-all"><Twitter size={20} /></a>
                 <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-blue-700 hover:text-white transition-all"><Linkedin size={20} /></a>
                 <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition-all"><Instagram size={20} /></a>
