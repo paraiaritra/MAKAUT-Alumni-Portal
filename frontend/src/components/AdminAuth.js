@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Lock, UserPlus, LogIn, X } from 'lucide-react';
+import { ShieldCheck, Lock, UserPlus, LogIn, X, Loader } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 
@@ -7,11 +7,13 @@ const AdminAuth = ({ onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '', adminSecret: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       if (isLogin) {
         // Standard login (backend verifies role)
@@ -19,12 +21,20 @@ const AdminAuth = ({ onClose }) => {
         onClose(); 
       } else {
         // Register using Secret Key
+        // Passing 'ADMIN' as batch/dept since admins don't have course details
         await authAPI.register({ ...formData, batch: 'ADMIN', department: 'ADMIN' });
+        
+        // Auto login after reg
         await login({ email: formData.email, password: formData.password });
         onClose();
       }
     } catch (err) {
-      setError('Access Denied. Invalid Credentials or Secret Key.');
+      console.error("Admin Auth Error:", err);
+      // FIX: Show the specific message from the backend if available
+      const backendMessage = err.response?.data?.message;
+      setError(backendMessage || 'Authentication failed. Check credentials or Secret Key.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,25 +51,56 @@ const AdminAuth = ({ onClose }) => {
         <h2 className="text-2xl font-bold text-center mb-2">Admin Portal</h2>
         <p className="text-slate-400 text-center mb-6 uppercase tracking-wider text-xs font-bold">Authorized Personnel Only</p>
         
-        {error && <div className="bg-red-500/20 text-red-300 p-3 rounded mb-4 text-center text-sm border border-red-500/50">{error}</div>}
+        {error && (
+          <div className="bg-red-500/20 text-red-300 p-3 rounded-lg mb-4 text-center text-sm border border-red-500/50">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <>
-              <input type="text" placeholder="Admin Name" className="w-full bg-slate-700 border-none rounded-lg p-3 text-white focus:ring-2 focus:ring-red-500" onChange={e => setFormData({...formData, name: e.target.value})} required />
-              <input type="password" placeholder="Secret Key (Required)" className="w-full bg-slate-700 border-none rounded-lg p-3 text-white focus:ring-2 focus:ring-red-500" onChange={e => setFormData({...formData, adminSecret: e.target.value})} required />
+              <input 
+                type="text" 
+                placeholder="Admin Name" 
+                className="w-full bg-slate-700 border-none rounded-lg p-3 text-white focus:ring-2 focus:ring-red-500 outline-none placeholder-slate-400" 
+                onChange={e => setFormData({...formData, name: e.target.value})} 
+                required 
+              />
+              <input 
+                type="password" 
+                placeholder="Secret Key (Required)" 
+                className="w-full bg-slate-700 border-none rounded-lg p-3 text-white focus:ring-2 focus:ring-red-500 outline-none placeholder-slate-400" 
+                onChange={e => setFormData({...formData, adminSecret: e.target.value})} 
+                required 
+              />
             </>
           )}
-          <input type="email" placeholder="Email Address" className="w-full bg-slate-700 border-none rounded-lg p-3 text-white focus:ring-2 focus:ring-red-500" onChange={e => setFormData({...formData, email: e.target.value})} required />
-          <input type="password" placeholder="Password" className="w-full bg-slate-700 border-none rounded-lg p-3 text-white focus:ring-2 focus:ring-red-500" onChange={e => setFormData({...formData, password: e.target.value})} required />
+          <input 
+            type="email" 
+            placeholder="Email Address" 
+            className="w-full bg-slate-700 border-none rounded-lg p-3 text-white focus:ring-2 focus:ring-red-500 outline-none placeholder-slate-400" 
+            onChange={e => setFormData({...formData, email: e.target.value})} 
+            required 
+          />
+          <input 
+            type="password" 
+            placeholder="Password" 
+            className="w-full bg-slate-700 border-none rounded-lg p-3 text-white focus:ring-2 focus:ring-red-500 outline-none placeholder-slate-400" 
+            onChange={e => setFormData({...formData, password: e.target.value})} 
+            required 
+          />
           
-          <button className="w-full bg-red-600 hover:bg-red-700 py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2">
-            {isLogin ? <><LogIn size={18} /> Login to Console</> : <><UserPlus size={18} /> Register Admin</>}
+          <button 
+            disabled={loading}
+            className="w-full bg-red-600 hover:bg-red-700 py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {loading ? <Loader className="animate-spin" size={18} /> : (isLogin ? <><LogIn size={18} /> Login to Console</> : <><UserPlus size={18} /> Register Admin</>)}
           </button>
         </form>
         
         <div className="mt-6 flex justify-between text-sm text-slate-400">
-          <button onClick={() => setIsLogin(!isLogin)} className="hover:text-white underline">
+          <button onClick={() => { setIsLogin(!isLogin); setError(''); }} className="hover:text-white underline">
             {isLogin ? 'Register New Admin' : 'Back to Login'}
           </button>
         </div>
