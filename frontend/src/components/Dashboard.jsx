@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, MapPin, ExternalLink, ArrowRight, Heart, Shield, Phone, Mail } from 'lucide-react';
 import EditProfileModal from './EditProfileModal'; 
 import AdminAuth from './AdminAuth';
+import DonateModal from './DonateModal'; // 1. Import DonateModal
 
 const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginClick }) => {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
@@ -9,6 +10,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
   
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showDonateModal, setShowDonateModal] = useState(false); // 2. New State
 
   const refreshData = () => { console.log("Profile updated"); };
 
@@ -27,7 +29,6 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
     finally { setLoading(false); }
   };
 
-  // Static Data
   const placedStudents = [
     { name: "Pravin Pandey", company: "Google", role: "Senior Software Engineer", image: "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702803/WhatsApp_Image_2025-12-03_at_00.42.37_aefca4ab_hyyaox.jpg" },
     { name: "Anupam Yadav", company: "Microsoft", role: "Product Manager", image: "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764701602/Screenshot_2025-12-03_002257_fd5lik.png" },
@@ -73,7 +74,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
         </div>
       </div>
 
-      {/* ADMIN LOGIN BUTTON (Floating) */}
+      {/* ADMIN LOGIN BUTTON */}
       {!user && (
         <div className="fixed bottom-6 right-6 z-40">
           <button onClick={() => setShowAdminLogin(true)} className="bg-slate-800 text-white p-3 rounded-full shadow-xl hover:bg-slate-900 border border-slate-700 flex items-center gap-2 text-sm font-bold pr-5 transition-transform hover:scale-105">
@@ -82,7 +83,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
         </div>
       )}
 
-      {/* DONATE SECTION (Only for Logged In Users) */}
+      {/* DONATE SECTION */}
       {user && (
         <div className="mb-16 bg-gradient-to-r from-pink-600 to-rose-600 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 transform hover:-translate-y-1 transition-transform">
           <div className="flex items-center gap-4">
@@ -94,7 +95,8 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
               <p className="text-pink-100">Your contribution helps us organize better events and scholarship programs.</p>
             </div>
           </div>
-          <button onClick={() => setShowEditModal(true)} className="bg-white text-pink-600 px-8 py-3 rounded-full font-bold shadow-lg hover:bg-pink-50 transition-colors whitespace-nowrap">
+          {/* 3. Updated onClick Handler */}
+          <button onClick={() => setShowDonateModal(true)} className="bg-white text-pink-600 px-8 py-3 rounded-full font-bold shadow-lg hover:bg-pink-50 transition-colors whitespace-nowrap">
             Donate Now
           </button>
         </div>
@@ -159,7 +161,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
         </div>
       </div>
 
-      {/* 6. CONTACT SECTION (Guaranteed at Bottom) */}
+      {/* 6. CONTACT SECTION */}
       <div className="bg-indigo-50 rounded-3xl p-8 md:p-12 border border-indigo-100 mb-12">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-indigo-900">Contact Us</h2>
@@ -167,41 +169,22 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          {/* Address */}
           <div className="bg-white p-6 rounded-2xl shadow-sm">
-            <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MapPin size={24} />
-            </div>
+            <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4"><MapPin size={24} /></div>
             <h3 className="font-bold text-gray-800 mb-2">Our Address</h3>
-            <p className="text-gray-600 text-sm">
-              <span className="font-semibold block mb-1">City Office:</span> BF-142, Sector-I, Saltlake City, Kolkata-64
-            </p>
-            <p className="text-gray-600 text-sm mt-2">
-              <span className="font-semibold block mb-1">Main Office:</span> NH12, Simhat, Nadia, West Bengal, 741249
-            </p>
+            <p className="text-gray-600 text-sm"><span className="font-semibold block mb-1">City Office:</span> BF-142, Sector-I, Saltlake City, Kolkata-64</p>
+            <p className="text-gray-600 text-sm mt-2"><span className="font-semibold block mb-1">Main Office:</span> NH12, Simhat, Nadia, West Bengal, 741249</p>
           </div>
-
-          {/* Email */}
           <div className="bg-white p-6 rounded-2xl shadow-sm">
-            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Mail size={24} />
-            </div>
+            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"><Mail size={24} /></div>
             <h3 className="font-bold text-gray-800 mb-2">Email Us</h3>
-            <a href="mailto:makautwb.alumni@gmail.com" className="text-indigo-600 font-medium hover:underline">
-              makautwb.alumni@gmail.com
-            </a>
+            <a href="mailto:makautwb.alumni@gmail.com" className="text-indigo-600 font-medium hover:underline">makautwb.alumni@gmail.com</a>
             <p className="text-xs text-gray-400 mt-2">We reply within 24 hours</p>
           </div>
-
-          {/* Call */}
           <div className="bg-white p-6 rounded-2xl shadow-sm">
-            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Phone size={24} />
-            </div>
+            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><Phone size={24} /></div>
             <h3 className="font-bold text-gray-800 mb-2">Call Us</h3>
-            <a href="tel:03325891555" className="text-2xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">
-              033 2589 1555
-            </a>
+            <a href="tel:03325891555" className="text-2xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">033 2589 1555</a>
             <p className="text-xs text-gray-400 mt-2">Mon - Fri, 9am - 5pm</p>
           </div>
         </div>
@@ -210,6 +193,8 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
       {/* MODALS */}
       {showEditModal && <EditProfileModal user={user} onClose={() => setShowEditModal(false)} onUpdateSuccess={refreshData} />}
       {showAdminLogin && <AdminAuth onClose={() => setShowAdminLogin(false)} />}
+      {/* 4. Render Donate Modal */}
+      {showDonateModal && <DonateModal onClose={() => setShowDonateModal(false)} />}
     </div>
   );
 };
