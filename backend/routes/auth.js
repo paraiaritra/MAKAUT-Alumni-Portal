@@ -126,7 +126,7 @@ router.post('/register', upload.single('photo'), async (req, res) => {
   }
 });
 
-// Loginhhhiiiiiiiiiiiii
+// Login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
