@@ -52,8 +52,9 @@ export const paymentAPI = {
 
 export const adminAPI = {
   getUnverifiedUsers: () => api.get('/admin/unverified'),
+  getPremiumMembers: () => api.get('/admin/members'),
   verifyUser: (id) => api.post(`/admin/verify/${id}`),
-  getPremiumMembers: () => api.get('/admin/members'), // NEW
+  deleteUser: (id) => api.delete(`/admin/users/${id}`), // NEW FUNCTION
 };
 
 export const contactAPI = {
