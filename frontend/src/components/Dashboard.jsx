@@ -51,7 +51,7 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
 
   // Static Data
   const placedStudents = [
-    { name: "Pravin Pandey", company: "Google", role: "Senior Software Engineer", image: "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702803/WhatsApp_Image_2025-12-03_at_00.42.37_aefca4ab_hyyaox.jpg" },
+    { name: "Pravin Pandey", company: "Google", role: "Senior Software Engineer", image: "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764865791/makaut_alumni/avatars/laxwpka2lllpt86touhm.jpg" },
     { name: "Anupam Yadav", company: "Microsoft", role: "Product Manager", image: "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764701602/Screenshot_2025-12-03_002257_fd5lik.png" },
     { name: "Sumon Khan", company: "Amazon", role: "Cloud Architect", image: "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702802/WhatsApp_Image_2025-12-03_at_00.42.36_802a130e_eoq2fr.jpg" }
   ];
