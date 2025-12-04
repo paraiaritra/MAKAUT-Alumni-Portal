@@ -135,7 +135,7 @@ const Auth = ({ onClose, login, register }) => {
           </button>
 
           <p className="text-center text-sm text-gray-600">
-            {isLogin ? "Don't have an account? " : "Already registered? "}
+            {isLogin ? "forget password    Don't have an account? " : "Already registered? "}
             <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-indigo-600 font-bold hover:underline">
               {isLogin ? 'Sign Up' : 'Login'}
             </button>
