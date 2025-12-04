@@ -57,9 +57,11 @@ const Dashboard = ({ eventsAPI, jobsAPI, alumniAPI, user, setActiveTab, onLoginC
   ];
 
   const galleryImages = [
-    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702282/IMG-20251203-WA0015_dmf5jt.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702280/IMG-20251203-WA0007_jbul4q.jpg",
     "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702282/IMG-20251203-WA0017_veqgxx.jpg",
-    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702281/IMG-20251203-WA0014_rw193d.jpg"
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764702281/IMG-20251203-WA0014_rw193d.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764857038/WhatsApp_Image_2025-12-04_at_19.27.46_c6aa53d5_hgoxgz.jpg",
+    "https://res.cloudinary.com/dyo7pelfy/image/upload/v1764857039/WhatsApp_Image_2025-12-04_at_19.29.27_12513edd_nazd8a.jpg"
   ];
 
   // Enhanced Section Data with Images
