@@ -39,45 +39,61 @@ const sanitizeLog = (body) => {
 // Register
 router.post('/register', upload.single('photo'), async (req, res) => {
   try {
-    // Note: With multer, req.body is only populated AFTER the file is processed
     console.log('REGISTER request:', sanitizeLog(req.body));
     
-    const { 
+    let { 
       firstName, lastName, email, password, registrationNumber, 
-      mobileNumber, gender, course, passoutYear, adminSecret 
+      mobileNumber, gender, course, passoutYear, adminSecret,
+      name // Fallback for simple forms sending 'name'
     } = req.body;
 
-    // Basic Validation
+    // --- 1. DETERMINE ROLE & FILL DEFAULTS ---
+    let role = 'user';
+    let isVerified = false;
+    const ADMIN_SECRET_KEY = "MAKAUT_ADMIN_2025"; 
+
+    if (adminSecret === ADMIN_SECRET_KEY) {
+      role = 'admin';
+      isVerified = true; 
+
+      // --- SAFETY NET: Auto-fill required fields for Admins ---
+      // Since Admins use a simpler form, we provide dummy values for student fields
+      // to satisfy the Mongoose Schema requirements.
+      
+      if (!firstName && name) {
+         const parts = name.trim().split(' ');
+         firstName = parts[0];
+         lastName = parts.slice(1).join(' ') || 'Admin';
+      }
+      if (!firstName) firstName = 'Admin';
+      if (!lastName) lastName = 'User';
+      
+      if (!registrationNumber) registrationNumber = `ADMIN-${Date.now()}`;
+      if (!mobileNumber) mobileNumber = '0000000000';
+      if (!gender) gender = 'Other';
+      if (!course) course = 'ADMINISTRATION';
+      if (!passoutYear) passoutYear = 'N/A';
+    }
+
+    // --- 2. VALIDATION (For Normal Users) ---
     if (!firstName || !lastName || !email || !password || !registrationNumber) {
-      return res.status(400).json({ message: 'Please provide all required fields' });
+      return res.status(400).json({ message: 'Missing required fields (Name, Reg No, etc.)' });
     }
 
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ message: 'User already exists' });
 
-    // Handle Photo Upload
+    // --- 3. HANDLE PHOTO ---
     let profilePicture;
     if (req.file) {
       try {
         profilePicture = await uploadToCloudinary(req.file.buffer);
       } catch (uploadErr) {
         console.error("Photo upload failed:", uploadErr);
-        // Continue without photo or return error based on preference
       }
     }
 
-    // DETERMINE ROLE: Check for Admin Secret
-    let role = 'user';
-    let isVerified = false;
-
-    // HARDCODED SECRET FOR NOW
-    const ADMIN_SECRET_KEY = "MAKAUT_ADMIN_2025"; 
-
-    if (adminSecret === ADMIN_SECRET_KEY) {
-      role = 'admin';
-      isVerified = true; // Admins are auto-verified
-    }
-
+    // --- 4. CREATE USER ---
     const user = new User({ 
       firstName,
       lastName,
@@ -86,9 +102,8 @@ router.post('/register', upload.single('photo'), async (req, res) => {
       registrationNumber,
       mobileNumber,
       gender,
-      // Map frontend fields to backend schema
-      department: course, // 'course' maps to 'department'
-      batch: passoutYear, // 'passoutYear' maps to 'batch'
+      department: course,  // Maps to schema 'department'
+      batch: passoutYear,  // Maps to schema 'batch'
       profilePicture,
       role, 
       isVerified 
@@ -111,18 +126,13 @@ router.post('/register', upload.single('photo'), async (req, res) => {
         email: user.email,
         role: user.role,
         isVerified: user.isVerified,
-        profilePicture: user.profilePicture,
-        // Send extra details
-        registrationNumber: user.registrationNumber,
-        mobileNumber: user.mobileNumber,
-        gender: user.gender,
-        department: user.department,
-        batch: user.batch
+        profilePicture: user.profilePicture
       }
     });
   } catch (err) {
     console.error('Register Error:', err.message);
-    res.status(500).json({ message: 'Server error during registration' });
+    // Return the specific validation error message from Mongoose if available
+    res.status(500).json({ message: err.message || 'Server error during registration' });
   }
 });
 
@@ -151,7 +161,6 @@ router.post('/login', async (req, res) => {
         role: user.role,
         isVerified: user.isVerified,
         profilePicture: user.profilePicture,
-        // Send extra details
         registrationNumber: user.registrationNumber,
         mobileNumber: user.mobileNumber,
         gender: user.gender,
